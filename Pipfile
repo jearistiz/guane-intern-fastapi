@@ -8,6 +8,7 @@ fastapi = "*"
 sqlalchemy = "*"
 uvicorn = "*"
 python-dotenv = "*"
+requests = "*"
 
 [dev-packages]
 pytest = "*"
