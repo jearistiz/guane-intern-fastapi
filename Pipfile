@@ -1,0 +1,25 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+sqlalchemy = "*"
+uvicorn = "*"
+python-dotenv = "*"
+
+[dev-packages]
+pytest = "*"
+pytest-cov = "*"
+flake8 = "*"
+
+[scripts]
+tests = "python -m pytest tests"
+tests-cov = "python -m pytest tests --cov app"
+tests-cov-html = "python -m pytest tests --cov-report html --cov app"
+linter = "flake8 app"
+server = "python run_server.py"
+
+[requires]
+python_version = "3.9"
