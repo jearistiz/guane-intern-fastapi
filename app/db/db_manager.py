@@ -1,21 +1,27 @@
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import sttgs
+from app.db.base_class import Base
 
 
-engine = create_engine(
+# Creates connection to PostgreSQL
+db_engine = create_engine(
     sttgs.get('PGDATA'),
     connect_args={"check_same_thread": False},
     echo=True
 )
 
+# Create a local session maker to interact with the db via ORM
 SessionLocal = sessionmaker(
     autocommit=False,
     autoflush=False,
-    bind=engine
+    bind=db_engine
 )
 
-# Base iss needed to use ORM models
-Base = declarative_base()
+
+def init_db(engine: Engine = db_engine):
+    """Creates all database tables if they don't already exist.
+    """
+    Base.metadata.create_all(bind=engine)
