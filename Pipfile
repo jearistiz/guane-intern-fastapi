@@ -9,6 +9,7 @@ sqlalchemy = "*"
 uvicorn = "*"
 python-dotenv = "*"
 requests = "*"
+psycopg2-binary = "*"
 
 [dev-packages]
 pytest = "*"
