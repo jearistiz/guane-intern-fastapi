@@ -132,3 +132,6 @@ dmypy.json
 
 # Editor
 .vscode/
+
+# Docs
+internal_docs/
