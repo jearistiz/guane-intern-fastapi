@@ -11,9 +11,9 @@ if __name__ == '__main__':
 
     uvicorn.run(
         "app:app",
-        host=sttgs.get('HOST'),
-        port=int(sttgs['PORT']),
+        host=sttgs.get('HOST', 'localhost'),
+        port=int(sttgs.get('PORT', 8080)),
         reload=True,
         debug=True,
-        workers=1
+        workers=int(sttgs.get('SERVER_WORKERS', 1))
     )

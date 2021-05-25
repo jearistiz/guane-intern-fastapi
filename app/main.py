@@ -6,6 +6,7 @@ from app.config import sttgs
 from app.api.api import api_router
 
 
+# Main app
 app = FastAPI(title=sttgs.get('PROJECT_TITLE'))
 
 app.add_middleware(
