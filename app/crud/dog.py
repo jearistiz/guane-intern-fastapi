@@ -18,3 +18,6 @@ class CRUDDog(CRUDBase[Dog, DogCreate, DogUpdate]):
             .limit(limit)
             .all()
         )
+
+
+dog = CRUDDog(Dog)

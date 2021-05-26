@@ -23,6 +23,9 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         """
         self.model = model
 
+    def get(self, db: Session, id: Any) -> Optional[ModelType]:
+        return db.query(self.model).filter(self.model.id == id).first()
+
     def get_by_name(self, db: Session, *, name_in: str) -> Optional[ModelType]:
         """Returns ``None`` when :attr:`CRUDBase.model` does not have attribute
         ``name``.
@@ -81,6 +84,12 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
             return None
 
         return self.update(db, db_obj=db_obj, obj_in=obj_in)
+
+    def remove(self, db: Session, *, id: int) -> ModelType:
+        obj = db.query(self.model).get(id)
+        db.delete(obj)
+        db.commit()
+        return obj
 
     def remove_one_by_name(self, db: Session, *, name: str) -> ModelType:
         """Returns ``None`` when :attr:`CRUDBase.model` does not have attribute
