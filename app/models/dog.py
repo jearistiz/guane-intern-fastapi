@@ -15,4 +15,4 @@ class Dog(Base):
     id_user = Column(Integer, ForeignKey('user.id'))
 
     # ORM relationship between Dog and User entity
-    owner = relationship('User', back_populates='dogs')
+    user = relationship('User', back_populates='dogs')

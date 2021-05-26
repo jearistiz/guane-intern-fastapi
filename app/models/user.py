@@ -11,4 +11,4 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
 
     # ORM relationship between User and Dog entity
-    dogs = relationship('Dog', back_populates='owner')
+    dogs = relationship('Dog', back_populates='user')
