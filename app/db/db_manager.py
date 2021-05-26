@@ -1,6 +1,7 @@
 from sqlalchemy import create_engine
-from sqlalchemy.engine.base import Engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm import sessionmaker, Session
+
 
 from app.config import sttgs
 from app.models.base_class import Base
@@ -18,7 +19,7 @@ engine = create_engine(
 
 
 # Create a local session maker to interact with the db via ORM
-def SessionLocal(engine: Engine = engine):
+def SessionLocal(engine: Engine = engine) -> Session:
     return sessionmaker(
         autocommit=False,
         autoflush=False,
