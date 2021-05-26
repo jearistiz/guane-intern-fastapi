@@ -27,8 +27,8 @@ class DogUpdate(DogBase):
 
 # Properties shared by DB models
 class DogInDBBase(DogBase):
-    id: int
-    create_date: datetime
+    id: Optional[int]
+    create_date: Optional[datetime] = datetime.utcnow()
     name: str
     picture: str
     is_adopted: bool

@@ -26,11 +26,11 @@ class UserUpdate(UserBase):
 
 # Properties shared by DB models
 class UserInDBBase(UserBase):
-    id: int
+    id: Optional[int]
+    create_date: Optional[datetime] = datetime.utcnow()
     name: str
     last_name: str
     email: EmailStr
-    create_date: datetime
 
     class Config:
         orm_mode = True

@@ -1,42 +1,36 @@
 from typing import Generator
 
 import pytest
-from sqlalchemy import create_engine
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.config import sttgs
-from app.db.db_manager import SessionLocal, init_db
+from app.db.init_db import init_db
 from app.models.base_class import Base
-from .utils import dogs
-
-
-engine = create_engine(
-    sttgs.get('PGDATA_TESTS'),
-    pool_pre_ping=True,
-    echo=True
-)
+from .mock.db_session import TestSessionLocal, test_engine
+from .mock.db_tables import populate_dog_table, populate_user_table
 
 
 # Setup test DB
 def pytest_sessionstart(session: pytest.Session):
     # Create all tables
-    init_db(engine=engine)
-
-    # Populate Dog table
+    init_db(engine=test_engine)
 
     # Populate User table
+    populate_user_table()
+
+    # Populate Dog table
+    populate_dog_table()
 
 
 # Delete all tables in test DB
 def pytest_sessionfinish(session: pytest.Session, exitstatus):
     # Delete all tables
-    Base.metadata.drop_all(engine)
+    Base.metadata.drop_all(test_engine)
 
 
 @pytest.fixture(scope="session")
 def db() -> Generator:
-    yield SessionLocal()
+    yield TestSessionLocal(engine=test_engine)
 
 
 @pytest.fixture(scope="module")
