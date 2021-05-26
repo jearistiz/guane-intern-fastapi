@@ -1,4 +1,5 @@
 from sqlalchemy import create_engine
+from sqlalchemy.engine.base import Engine
 from sqlalchemy.orm import sessionmaker
 
 from app.config import sttgs
@@ -15,16 +16,17 @@ engine = create_engine(
     echo=True
 )
 
+
 # Create a local session maker to interact with the db via ORM
-SessionLocal = sessionmaker(
-    autocommit=False,
-    autoflush=False,
-    bind=engine
-)
+def SessionLocal(engine: Engine = engine):
+    return sessionmaker(
+        autocommit=False,
+        autoflush=False,
+        bind=engine
+    )
 
 
-def init_db():
+def init_db(engine: Engine = engine):
     """Creates all database tables if they don't already exist.
     """
-
     Base.metadata.create_all(bind=engine)
