@@ -10,6 +10,7 @@ uvicorn = "*"
 python-dotenv = "*"
 requests = "*"
 psycopg2-binary = "*"
+email-validator = "*"
 
 [dev-packages]
 pytest = "*"

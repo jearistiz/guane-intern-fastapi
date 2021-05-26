@@ -1,4 +1,4 @@
-from app.db.base_class import Base
+from app.models.base_class import Base
 from app.models.dog import Dog
 from app.models.user import User
 

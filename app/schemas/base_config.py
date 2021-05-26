@@ -1,0 +1,2 @@
+class ConfigBase:
+    extra = 'forbid'
