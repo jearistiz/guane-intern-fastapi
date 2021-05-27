@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel
 
@@ -41,3 +41,7 @@ class DogInDBBase(DogBase):
 # Properties to return in HTTP response
 class Dog(DogInDBBase):
     pass
+
+
+class Dogs(BaseModel):
+    dogs: List[Dog]

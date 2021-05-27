@@ -33,8 +33,8 @@ def parse_user_dict(
     """User info contained in a dictionary
     """
     return {
+        'create_date': create_date,
         'name': name,
         'last_name': last_name,
         'email': email,
-        'create_date': create_date,
     }

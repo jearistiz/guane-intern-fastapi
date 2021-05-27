@@ -5,9 +5,10 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.db.init_db import init_db
+from app.db.utils import populate_dog_table, populate_user_table
 from app.models.base_class import Base
+from mock_data.db_test_data import dogs_mock, users_mock
 from .mock.db_session import TestSessionLocal, test_engine
-from .mock.db_tables import populate_dog_table, populate_user_table
 
 
 # Setup test DB
@@ -16,10 +17,10 @@ def pytest_sessionstart(session: pytest.Session):
     init_db(engine=test_engine)
 
     # Populate User table
-    populate_user_table()
+    populate_user_table(Session=TestSessionLocal, users_in=users_mock)
 
     # Populate Dog table
-    populate_dog_table()
+    populate_dog_table(Session=TestSessionLocal, dogs_in=dogs_mock)
 
 
 # Delete all tables in test DB

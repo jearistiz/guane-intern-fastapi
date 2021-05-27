@@ -4,18 +4,25 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.api import deps
+from app import schemas, crud, models
 
 
 dogs_router = APIRouter()
 
 
-@dogs_router.get('/', name='List of all dogs\' info.')
+@dogs_router.get(
+    '/',
+    response_model=schemas.Dogs,
+    name='List of all dogs\' info.'
+)
 async def dogs(
-    db: Session = Depends(deps.get_db)
+    db: Session = Depends(deps.get_db),
 ) -> Any:
-    """Get a list of all dog entities.
-    """
-    return {'hello': 'world'}
+    return {
+        'dogs': [
+            models.Dog(**dog._asdict()) for dog in crud.dog.get_multi(db)
+        ]
+    }
 
 
 @dogs_router.get('/{name}', name='Dog info by name.')

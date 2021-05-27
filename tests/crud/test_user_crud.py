@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.models import User
 from app.schemas import UserUpdate, UserCreate
-from ..mock.db_test_data import users_mock_dicts, users_mock
+from mock_data.db_test_data import users_mock_dicts, users_mock
 
 
 def test_get(db: Session):

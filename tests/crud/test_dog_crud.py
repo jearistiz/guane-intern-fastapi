@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 
 from app import crud
-from ..mock.db_test_data import adopted_dogs_dicts
+from mock_data.db_test_data import adopted_dogs_dicts
 
 
 def test_get_adopter(db: Session):

@@ -22,7 +22,7 @@ app = {editable = true, path = "."}
 tests = "python -m pytest tests"
 tests-cov = "python -m pytest tests --cov app"
 tests-cov-html = "python -m pytest tests --cov-report html --cov app"
-linter = "flake8 app/ tests/ scripts/"
+linter = "flake8 app/ tests/ scripts/ mock_data/"
 server = "python run_server.py"
 # WARNING: running the following scripts may cause inevitable loss of information
 drop-all-tables = "python scripts/drop_all_db_tables.py"
