@@ -1,7 +1,7 @@
 import uvicorn
 
 from app.config import sttgs
-from app.db.db_manager import init_db
+from app.db.init_db import init_db
 
 
 if __name__ == '__main__':

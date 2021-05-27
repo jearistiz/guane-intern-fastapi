@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
-from app.api.routers import dog, user
+from app.api.routers import dogs_router, users_router
 
 api_router = APIRouter()
-api_router.include_router(dog.dog_router, prefix='/dog', tags=['dog'])
-api_router.include_router(user.user_router, prefix='/user', tags=['user'])
+api_router.include_router(dogs_router, prefix='/dogs', tags=['dogs'])
+api_router.include_router(users_router, prefix='/users', tags=['users'])
