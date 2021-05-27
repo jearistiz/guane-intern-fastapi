@@ -1,8 +1,5 @@
-from app.models import Base
-from app.db.session import engine
-from app.db.init_db import init_db
+from app.db.db_manager import drop_all_tables
 
 
 if __name__ == '__main__':
-    init_db()
-    Base.metadata.drop_all(bind=engine)
+    drop_all_tables(drop=True)

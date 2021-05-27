@@ -1,15 +1,15 @@
 import uvicorn
 
 from app.config import sttgs
-from app.db.init_db import init_db
+from app.db.db_manager import create_all_tables, drop_all_tables
 from app.db.utils import populate_tables_mock_data
 
 
 if __name__ == '__main__':
 
     # Initialize database
-    init_db()
-    populate_tables_mock_data(True)
+    create_all_tables()
+    populate_tables_mock_data(populate=True)
 
     # Run server
     uvicorn.run(
@@ -20,3 +20,6 @@ if __name__ == '__main__':
         debug=True,
         workers=int(sttgs.get('SERVER_WORKERS', 1))
     )
+
+    # Optionally delete tables after server is shut down
+    drop_all_tables(drop=True)

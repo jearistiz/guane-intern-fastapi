@@ -7,7 +7,12 @@ from app.db import base  # noqa
 from app.db.session import engine
 
 
-def init_db(engine: Engine = engine):
+def create_all_tables(engine: Engine = engine):
     """Creates all database tables if they don't already exist.
     """
     Base.metadata.create_all(bind=engine)
+
+
+def drop_all_tables(engine: Engine = engine, *, drop: bool):
+    if drop:
+        Base.metadata.drop_all(bind=engine)
