@@ -31,9 +31,15 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         ``name``.
         """
         try:
-            db.query(self.model).filter(self.model.name == name_in).first()
+            db_obj = (
+                db.query(self.model)
+                .filter(self.model.name == name_in)
+                .first()
+            )
         except Exception:
             return None
+
+        return db_obj
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: Optional[int] = None
@@ -79,7 +85,11 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         ``name``.
         """
         try:
-            db_obj = db.query(self.model).filter(self.model.name).first()
+            db_obj = (
+                db.query(self.model)
+                .filter(self.model.name == name_in_db)
+                .first()
+            )
         except Exception:
             return None
 
@@ -96,7 +106,7 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         ``name``.
         """
         try:
-            obj = db.query(self.model).filter(self.model.name == name)
+            obj = db.query(self.model).filter(self.model.name == name).first()
         except Exception:
             return None
         db.delete(obj)

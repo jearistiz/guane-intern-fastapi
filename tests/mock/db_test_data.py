@@ -19,10 +19,10 @@ dogs_mock = [
 ]
 
 users_info = [
-    [datetime.utcnow(), 'Guane', 'Enterprises', 'info@guane.com.co'],
-    [datetime.utcnow(), 'Guane', 'CharlieBot', 'CharlieBot@guane.com.co'],
-    [datetime.utcnow(), 'Guane', 'Thori', 'Thori@guane.com.co'],
-    [datetime.utcnow(), 'Guane', 'Fuelai', 'Fuelai@guane.com.co'],
+    [datetime.utcnow(), 'Guane1', 'Enterprises', 'info@guane.com.co'],
+    [datetime.utcnow(), 'Guane2', 'CharlieBot', 'CharlieBot@guane.com.co'],
+    [datetime.utcnow(), 'Guane3', 'Thori', 'Thori@guane.com.co'],
+    [datetime.utcnow(), 'Guane4', 'Fuelai', 'Fuelai@guane.com.co'],
 ]
 
 users_mock_dicts = [

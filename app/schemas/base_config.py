@@ -1,2 +1,3 @@
 class ConfigBase:
-    extra = 'forbid'
+    # extra = 'forbid'
+    pass

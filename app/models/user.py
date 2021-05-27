@@ -9,7 +9,7 @@ class User(Base):
     create_date = Column(DateTime, index=True)
     name = Column(String, index=True)
     last_name = Column(String, index=True)
-    email = Column(String, unique=True, index=True, nullable=False)
+    email = Column(String, index=True)
 
     # ORM relationship between User and Dog entity
     dogs = relationship('Dog', back_populates='user')
