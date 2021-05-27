@@ -2,12 +2,14 @@ from datetime import datetime
 from typing import Any, Dict
 
 
-def dog_dict(
+def parse_dog_dict(
     create_date: datetime,
     name: str,
     picture: str,
     is_adopted: bool,
     id_user: int,
+    *args,
+    **kwargs
 ) -> Dict[str, Any]:
     """Dog info contained in a dictionary
     """
@@ -20,11 +22,13 @@ def dog_dict(
     }
 
 
-def user_dict(
+def parse_user_dict(
     create_date: datetime,
     name: str,
     last_name: str,
     email: str,
+    *args,
+    **kwargs
 ) -> Dict[str, Any]:
     """User info contained in a dictionary
     """

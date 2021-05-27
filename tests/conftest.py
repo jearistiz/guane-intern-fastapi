@@ -23,14 +23,18 @@ def pytest_sessionstart(session: pytest.Session):
 
 
 # Delete all tables in test DB
-def pytest_sessionfinish(session: pytest.Session, exitstatus):
+def pytest_sessionfinish(session: pytest.Session):
     # Delete all tables
-    Base.metadata.drop_all(test_engine)
+    Base.metadata.drop_all(bind=test_engine)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="module")
 def db() -> Generator:
-    yield TestSessionLocal(engine=test_engine)
+    db = TestSessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
 @pytest.fixture(scope="module")

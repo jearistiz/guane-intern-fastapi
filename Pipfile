@@ -25,8 +25,8 @@ tests-cov-html = "python -m pytest tests --cov-report html --cov app"
 linter = "flake8 app/ tests/ scripts/"
 server = "python run_server.py"
 # WARNING: running the following scripts may cause inevitable loss of information
-drop_all_tables = "python scripts/drop_all_db_tables.py"
-drop_all_test_tables = "python scripts/drop_all_test_db_tables.py"
+drop-all-tables = "python scripts/drop_all_db_tables.py"
+drop-all-test-tables = "python scripts/drop_all_test_db_tables.py"
 
 [requires]
 python_version = "3.9"
