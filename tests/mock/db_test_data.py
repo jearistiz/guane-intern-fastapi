@@ -3,6 +3,7 @@ from datetime import datetime
 from app.schemas import DogInDBBase, UserInDBBase
 from .utils import parse_dog_dict, parse_user_dict
 
+
 dogs_info = [
     [datetime.utcnow(), 'Guane', 'https://randomurl.com', False, None],
     [datetime.utcnow(), 'Is', 'https://randomurl.com', False, None],

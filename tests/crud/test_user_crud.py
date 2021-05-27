@@ -62,7 +62,9 @@ def test_update_by_name(db: Session):
     updated_obj_info = user_obj._asdict()
     updated_obj_info.update({'last_name': updated_last_name})
     obj_in = UserUpdate(**updated_obj_info)
-    updated_obj = crud.user.update_by_name(db, name_in_db=user_name, obj_in=obj_in)
+    updated_obj = crud.user.update_by_name(
+        db, name_in_db=user_name, obj_in=obj_in
+    )
     assert updated_obj.id == user_obj.id
     assert updated_obj.last_name == updated_last_name
 
