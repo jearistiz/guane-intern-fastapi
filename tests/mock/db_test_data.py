@@ -11,12 +11,17 @@ dogs_info = [
     [datetime.utcnow(), 'Yeah!', 'https://randomurl.com', True, 2],
 ]
 
-dog_mock_dicts = [
+dogs_mock_dicts = [
     parse_dog_dict(*dog_info) for dog_info in dogs_info
 ]
 
+adopted_dogs_dicts = [
+    dog_info for dog_info in dogs_mock_dicts
+    if dog_info.get('is_adopted', None)
+]
+
 dogs_mock = [
-    DogInDBBase(**dog_dict) for dog_dict in dog_mock_dicts
+    DogInDBBase(**dog_dict) for dog_dict in dogs_mock_dicts
 ]
 
 users_info = [
