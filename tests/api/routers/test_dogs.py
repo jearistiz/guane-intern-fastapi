@@ -47,7 +47,6 @@ class TestDogsRouter(HandleDBTest):
 
     def test_get_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0]
-        data['create_date'] = data['create_date']
         get_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.get(get_dogs_name_route, json=data)
         assert response.status_code == 200
@@ -57,7 +56,6 @@ class TestDogsRouter(HandleDBTest):
     def test_post_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
         data.update({'name': 'Juan'})
-        data['create_date'] = data['create_date']
         post_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.post(post_dogs_name_route, json=data)
         assert response.status_code == 200
@@ -68,7 +66,6 @@ class TestDogsRouter(HandleDBTest):
         data = dogs_mock_dicts[0].copy()
         old_name = data['name']
         data.update({'name': 'Juan'})
-        data['create_date'] = data['create_date']
         put_dogs_name_route = self.dogs_name_route(old_name)
         response = app_client.put(put_dogs_name_route, json=data)
         assert response.status_code == 200
@@ -77,7 +74,6 @@ class TestDogsRouter(HandleDBTest):
 
     def test_delete_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0]
-        data['create_date'] = data['create_date']
         get_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.delete(get_dogs_name_route, json=data)
         assert response.status_code == 200
