@@ -76,4 +76,3 @@ def post_file_to_uri(
             save_file_copy.truncate()
 
     return request
-
