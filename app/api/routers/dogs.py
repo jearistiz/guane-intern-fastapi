@@ -15,10 +15,11 @@ dogs_router = APIRouter()
     response_model=schemas.Dogs,
     name='List of all dogs\' info.'
 )
-async def dogs(
+async def get_dogs(
     db: Session = Depends(deps.get_db),
 ) -> Any:
-
+    """Get a list of all ``dog`` entities.
+    """
     all_dogs = {
         'dogs': [
             models.Dog(**dog._asdict()) for dog in crud.dog.get_multi(db)
@@ -28,7 +29,7 @@ async def dogs(
     if all_dogs['dogs']:
         return all_dogs
     else:
-        raise HTTPException(404, detail='No dogs found')
+        raise HTTPException(400, detail='No dogs found')
 
 
 @dogs_router.get(
@@ -45,7 +46,7 @@ async def get_dogs_is_adopted(
     adopted_dogs = crud.dog.get_adopted(db)
     if not adopted_dogs:
         raise HTTPException(
-            404,
+            400,
             detail='No adopted dogs found.'
         )
     return {'adopted_dogs': adopted_dogs}
@@ -67,7 +68,7 @@ async def get_dogs_name(
 
     if not dog_by_name:
         raise HTTPException(
-            404,
+            400,
             detail=f'Dog with name \'{name}\' not found.'
         )
 
@@ -97,7 +98,7 @@ async def post_dogs_name(
 
     if not created_dog:
         raise HTTPException(
-            404,
+            400,
             detail=f'Create query of dog \'{name}\' finished but was not '
                    'saved.'
         )
@@ -130,7 +131,7 @@ async def put_dogs_name(
 
     if not updated_dog:
         raise HTTPException(
-            404,
+            400,
             f'Dog \'{name}\' was not updated.'
         )
 
@@ -157,7 +158,7 @@ async def delete_dogs_name(
 
     if not deleted_dog:
         raise HTTPException(
-            404,
+            400,
             f'Dog \'{name}\' was not deleted.'
         )
 
