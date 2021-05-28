@@ -2,22 +2,24 @@ from fastapi.testclient import TestClient
 
 from app.config import sttgs
 from mock_data.db_test_data import dogs_mock_dicts, adopted_dogs_dicts
-from tests.mock.db_session import clean_all_test_tables, populate_test_tables
+from tests.utils.handle_db_test import HandleDBTest
 
 
-class TestDogsRouter:
+class TestDogsRouter(HandleDBTest):
 
     dogs_api_prefix = sttgs.get('API_PREFIX') + sttgs.get('DOGS_API_PREFIX')
 
-    def setup_method(self):
-        populate_test_tables()
+    def dogs_name_route(self, name):
+        return self.dogs_api_prefix + '/' + name
 
-    def teardown_method(self):
-        clean_all_test_tables()
-
-    @classmethod
-    def teardown_class(cls):
-        populate_test_tables()
+    def assert_dogs_data(self, *, reference: dict, compare: dict):
+        assert compare['name'] == reference['name']
+        assert compare['picture'] == reference['picture']
+        assert 'create_date' in compare
+        assert 'id' in compare
+        assert 'picture' in compare
+        assert 'is_adopted' in compare
+        assert 'id_user' in compare
 
     def test_get_dogs(self, app_client: TestClient) -> None:
         response = app_client.get(self.dogs_api_prefix)
@@ -45,42 +47,35 @@ class TestDogsRouter:
 
     def test_get_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0]
-        data['create_date'] = str(data['create_date'])
-        get_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        get_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.get(get_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_post_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
-        old_name = data['name']
         data.update({'name': 'Juan'})
-        data['create_date'] = str(data['create_date'])
-        post_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        post_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.post(post_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
-        # Revert test database to previous status
-        data.update({'name': old_name})
-        response2 = app_client.post(post_dogs_name_route, json=data)
-        assert response2.status_code == 200
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_put_dogs_name(self, app_client: TestClient) -> None:
-        ...
+        data = dogs_mock_dicts[0].copy()
+        old_name = data['name']
+        data.update({'name': 'Juan'})
+        put_dogs_name_route = self.dogs_name_route(old_name)
+        response = app_client.put(put_dogs_name_route, json=data)
+        assert response.status_code == 200
+        content = response.json()
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_delete_dogs_name(self, app_client: TestClient) -> None:
-        ...
+        data = dogs_mock_dicts[0]
+        get_dogs_name_route = self.dogs_name_route(data.get('name'))
+        response = app_client.delete(get_dogs_name_route, json=data)
+        assert response.status_code == 200
+        content = response.json()
+        self.assert_dogs_data(reference=data, compare=content)
