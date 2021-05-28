@@ -3,11 +3,16 @@ from typing import Any
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app import schemas, crud
 from app.api import deps
-from app import schemas, crud, models
+from app.api.services.web_crud import WebCRUDWrapper
 
 
 dogs_router = APIRouter()
+
+# Web crud was implemented as a wrapper to avoid duplicate code between
+# the two main routers (dogs, users)
+dog_web_crud = WebCRUDWrapper(crud.dog, enty_name='dog')
 
 
 @dogs_router.get(
@@ -20,16 +25,7 @@ async def get_dogs(
 ) -> Any:
     """Get a list of all ``dog`` entities.
     """
-    all_dogs = {
-        'dogs': [
-            models.Dog(**dog._asdict()) for dog in crud.dog.get_multi(db)
-        ]
-    }
-
-    if all_dogs['dogs']:
-        return all_dogs
-    else:
-        raise HTTPException(400, detail='No dogs found')
+    return dog_web_crud.get_all_entries(db)
 
 
 @dogs_router.get(
@@ -64,15 +60,7 @@ async def get_dogs_name(
 ) -> Any:
     """Read one ``dog`` entity based on its name
     """
-    dog_by_name = crud.dog.get_by_name(db, name_in=name)
-
-    if not dog_by_name:
-        raise HTTPException(
-            400,
-            detail=f'Dog with name \'{name}\' not found.'
-        )
-
-    return dog_by_name
+    return dog_web_crud.get_enty_by_name(db, name)
 
 
 @dogs_router.post(
@@ -88,22 +76,7 @@ async def post_dogs_name(
 ) -> Any:
     """Save one ``dog`` entity.
     """
-    try:
-        created_dog = crud.dog.create(db, obj_in=dog_info)
-    except Exception:
-        raise HTTPException(
-            500,
-            detail=f'Error while creating dog \'{name}\' in database.'
-        )
-
-    if not created_dog:
-        raise HTTPException(
-            400,
-            detail=f'Create query of dog \'{name}\' finished but was not '
-                   'saved.'
-        )
-
-    return created_dog
+    return dog_web_crud.post_enty_by_name(db, name=name, enty_info=dog_info)
 
 
 @dogs_router.put(
@@ -119,23 +92,9 @@ async def put_dogs_name(
 ) -> Any:
     """Update one ``dog`` entity based on its name.
     """
-    try:
-        updated_dog = crud.dog.update_by_name(
-            db, name_in_db=name, obj_in=dog_new_info
-        )
-    except Exception:
-        raise HTTPException(
-            500,
-            f'Error while updating dog \'{name}\' in database.'
-        )
-
-    if not updated_dog:
-        raise HTTPException(
-            400,
-            f'Dog \'{name}\' was not updated.'
-        )
-
-    return updated_dog
+    return dog_web_crud.put_enty_by_name(
+        db, name=name, enty_new_info=dog_new_info
+    )
 
 
 @dogs_router.delete(
@@ -148,18 +107,4 @@ async def delete_dogs_name(
     db: Session = Depends(deps.get_db),
     name: str
 ) -> Any:
-    try:
-        deleted_dog = crud.dog.remove_one_by_name(db, name=name)
-    except Exception:
-        raise HTTPException(
-            500,
-            f'Error while deleting dog \'{name}\' from database.'
-        )
-
-    if not deleted_dog:
-        raise HTTPException(
-            400,
-            f'Dog \'{name}\' was not deleted.'
-        )
-
-    return deleted_dog
+    return dog_web_crud.delete_enty_by_name(db, name=name)

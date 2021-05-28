@@ -1,13 +1,18 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
-from app import crud, models, schemas
+from app import crud, schemas
 from app.api import deps
+from app.api.services.web_crud import WebCRUDWrapper
 
 
 users_router = APIRouter()
+
+# Web crud was implemented as a wrapper to avoid duplicate code between
+# the two main routers (dogs, users)
+user_web_crud = WebCRUDWrapper(crud.user, enty_name='user')
 
 
 @users_router.get(
@@ -18,18 +23,7 @@ users_router = APIRouter()
 async def get_users(
     db: Session = Depends(deps.get_db)
 ) -> Any:
-    """Get a list of all ``user`` entities.
-    """
-    all_users = {
-        'users': [
-            models.User(**user._asdict()) for user in crud.user.get_multi(db)
-        ]
-    }
-
-    if all_users.get('users'):
-        return all_users
-    else:
-        raise HTTPException(400, detail='No users found')
+    return user_web_crud.get_all_entries(db)
 
 
 @users_router.get(
@@ -44,21 +38,13 @@ async def get_users_name(
 ) -> Any:
     """Read one ``user`` entity based on its name.
     """
-    user_by_name = crud.user.get_by_name(db, name_in=name)
-
-    if not user_by_name:
-        raise HTTPException(
-            400,
-            detail=f'User with name \'{name}\' not found.'
-        )
-
-    return user_by_name
+    return user_web_crud.get_enty_by_name(db, name)
 
 
 @users_router.post(
     '/{name}',
     response_model=schemas.User,
-    name='Save user'
+    name='Create user'
 )
 async def post_users_name(
     *,
@@ -68,22 +54,7 @@ async def post_users_name(
 ) -> Any:
     """Save one ``user`` entity.
     """
-    try:
-        created_user = crud.user.create(db, obj_in=user_info)
-    except Exception:
-        raise HTTPException(
-            500,
-            detail=f'Error while creating user \'{name}\' in database.'
-        )
-
-    if not created_user:
-        raise HTTPException(
-            400,
-            detail=f'Create query of user \'{name}\' finished but was not '
-                   'saved.'
-        )
-
-    return created_user
+    return user_web_crud.post_enty_by_name(db, name=name, enty_info=user_info)
 
 
 @users_router.put(
@@ -99,24 +70,9 @@ async def put_users_name(
 ) -> Any:
     """Update one ``user`` entity based on its name.
     """
-    try:
-        updated_user = crud.user.update_by_name(
-            db, name_in_db=name, obj_in=user_new_info
-        )
-    except Exception:
-        raise HTTPException(
-            500,
-            f'Error while updating user \'{name}\' in database. '
-            'Probably the user does not exist in database.'
-        )
-
-    if not updated_user:
-        raise HTTPException(
-            400,
-            f'User \'{name}\' was not updated.'
-        )
-
-    return updated_user
+    return user_web_crud.put_enty_by_name(
+        db, name=name, enty_new_info=user_new_info
+    )
 
 
 @users_router.delete(
@@ -131,19 +87,4 @@ async def delete_users_name(
 ) -> Any:
     """Delete one ``user`` entity based on its name.
     """
-    try:
-        deleted_user = crud.user.remove_one_by_name(db, name=name)
-    except Exception:
-        raise HTTPException(
-            500,
-            f'Error while deleting user \'{name}\' from database. '
-            'Probably the user does not exist in database.'
-        )
-
-    if not deleted_user:
-        raise HTTPException(
-            400,
-            f'User \'{name}\' was not deleted.'
-        )
-
-    return deleted_user
+    return user_web_crud.delete_enty_by_name(db, name=name)
