@@ -50,7 +50,6 @@ class TestDogsRouter(HandleDBTest):
 
     def test_post_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
-        old_name = data['name']
         data.update({'name': 'Juan'})
         data['create_date'] = str(data['create_date'])
         post_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
@@ -64,13 +63,35 @@ class TestDogsRouter(HandleDBTest):
         assert 'picture' in content
         assert 'is_adopted' in content
         assert 'id_user' in content
-        # Revert test database to previous status
-        data.update({'name': old_name})
-        response2 = app_client.post(post_dogs_name_route, json=data)
-        assert response2.status_code == 200
 
     def test_put_dogs_name(self, app_client: TestClient) -> None:
-        ...
+        data = dogs_mock_dicts[0].copy()
+        old_name = data['name']
+        data.update({'name': 'Juan'})
+        data['create_date'] = str(data['create_date'])
+        post_dogs_name_route = self.dogs_api_prefix + '/' + old_name
+        response = app_client.put(post_dogs_name_route, json=data)
+        assert response.status_code == 200
+        content = response.json()
+        assert content['name'] == data['name']
+        assert content['picture'] == data['picture']
+        assert 'create_date' in content
+        assert 'id' in content
+        assert 'picture' in content
+        assert 'is_adopted' in content
+        assert 'id_user' in content
 
     def test_delete_dogs_name(self, app_client: TestClient) -> None:
-        ...
+        data = dogs_mock_dicts[0]
+        data['create_date'] = str(data['create_date'])
+        get_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        response = app_client.delete(get_dogs_name_route, json=data)
+        assert response.status_code == 200
+        content = response.json()
+        assert content['name'] == data['name']
+        assert content['picture'] == data['picture']
+        assert 'create_date' in content
+        assert 'id' in content
+        assert 'picture' in content
+        assert 'is_adopted' in content
+        assert 'id_user' in content

@@ -23,7 +23,7 @@ def pytest_sessionfinish(session: pytest.Session):
     close_test_db()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def db() -> Generator:
     db = TestSessionLocal()
     try:
@@ -32,7 +32,7 @@ def db() -> Generator:
         db.close()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="function")
 def app_client(db) -> Generator:
     app.dependency_overrides[get_db] = testing_get_db
     test_app = TestClient(app)

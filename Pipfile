@@ -20,6 +20,7 @@ app = {editable = true, path = "."}
 
 [scripts]
 tests = "python -m pytest tests"
+tests-log = "python -m pytest tests --capture=tee-sys"
 tests-cov = "python -m pytest tests --cov app"
 tests-cov-html = "python -m pytest tests --cov-report html --cov app"
 linter = "flake8 app/ tests/ scripts/ mock_data/"

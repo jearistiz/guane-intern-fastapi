@@ -1,13 +1,20 @@
-from tests.mock.db_session import clean_all_test_tables, populate_test_tables
+from tests.mock.db_session import (  # noqa
+    close_test_db,
+    init_test_db,
+)
 
 
 class HandleDBTest:
+    """This Class assures that all tests within a subclass are done in
+    the same database-circumstances
+    """
     def setup_method(self):
-        populate_test_tables()
+        # populate_test_tables
+        init_test_db()
 
     def teardown_method(self):
-        clean_all_test_tables()
+        close_test_db()
 
     @classmethod
     def teardown_class(cls):
-        populate_test_tables()
+        init_test_db()
