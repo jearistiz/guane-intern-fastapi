@@ -4,7 +4,7 @@ from app.schemas.dog import (
 from app.schemas.user import (
     UserBase, UserCreate, UserUpdate, UserInDBBase, User, Users
 )
-
+from app.schemas.upload import UploadFileStatus
 
 __all__ = [
     'DogBase',
@@ -20,4 +20,5 @@ __all__ = [
     'UserInDBBase',
     'User',
     'Users',
+    'UploadFileStatus',
 ]

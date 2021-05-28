@@ -5,14 +5,13 @@ from sqlalchemy.orm import Session
 
 from app import crud, schemas
 from app.api import deps
-from app.api.services.web_crud import WebCRUDWrapper
 
 
 users_router = APIRouter()
 
 # Web crud was implemented as a wrapper to avoid duplicate code between
 # the two main routers (dogs, users)
-user_web_crud = WebCRUDWrapper(crud.user, enty_name='user')
+user_web_crud = crud.WebCRUDWrapper(crud.user, enty_name='user')
 
 
 @users_router.get(
