@@ -2,22 +2,12 @@ from fastapi.testclient import TestClient
 
 from app.config import sttgs
 from mock_data.db_test_data import dogs_mock_dicts, adopted_dogs_dicts
-from tests.mock.db_session import clean_all_test_tables, populate_test_tables
+from tests.utils.handle_db_test import HandleDBTest
 
 
-class TestDogsRouter:
+class TestDogsRouter(HandleDBTest):
 
     dogs_api_prefix = sttgs.get('API_PREFIX') + sttgs.get('DOGS_API_PREFIX')
-
-    def setup_method(self):
-        populate_test_tables()
-
-    def teardown_method(self):
-        clean_all_test_tables()
-
-    @classmethod
-    def teardown_class(cls):
-        populate_test_tables()
 
     def test_get_dogs(self, app_client: TestClient) -> None:
         response = app_client.get(self.dogs_api_prefix)
