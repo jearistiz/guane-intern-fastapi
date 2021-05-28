@@ -5,7 +5,7 @@ from app.db.utils.parse_dicts import parse_dog_dict, parse_user_dict
 from app.services.http_request import get_dog_picture_uri
 
 # Random date
-date = datetime(2021, 5, 27, 3, 54, 58, 217637)
+date = str(datetime(2021, 5, 27, 3, 54, 58, 217637))
 
 dogs_info = [
     [date, 'Guane', get_dog_picture_uri(), False, None],

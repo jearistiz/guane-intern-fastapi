@@ -5,6 +5,7 @@ from app.models import User
 from app.schemas import UserUpdate, UserCreate
 from mock_data.db_test_data import users_mock_dicts, users_mock
 from tests.utils.handle_db_test import HandleDBTest
+from tests.utils.parse_dict import update_dict_fmt_item
 
 
 class TestUserCrud(HandleDBTest):
@@ -13,6 +14,7 @@ class TestUserCrud(HandleDBTest):
         user_out = crud.user.get(db, id=1)
         user_compare = user_out._asdict()
         user_compare.pop('id')
+        update_dict_fmt_item(user_compare, 'create_date', str)
         assert user_compare in users_mock_dicts
 
     def test_get_by_name(self, db: Session):
@@ -21,14 +23,16 @@ class TestUserCrud(HandleDBTest):
         assert isinstance(user_out, User), f'{name} is supposed to be in db'
         user_compare = user_out._asdict()
         user_compare.pop('id')
+        update_dict_fmt_item(user_compare, 'create_date', str)
         assert user_compare in users_mock_dicts
 
     def test_get_multi(self, db: Session):
         users_out = crud.user.get_multi(db)
         for user_out in users_out:
-            dog_compare = user_out._asdict()
-            dog_compare.pop('id')
-            assert dog_compare in users_mock_dicts
+            user_compare = user_out._asdict()
+            user_compare.pop('id')
+            update_dict_fmt_item(user_compare, 'create_date', str)
+            assert user_compare in users_mock_dicts
 
     def test_create(self, db: Session):
         user = users_mock[0]

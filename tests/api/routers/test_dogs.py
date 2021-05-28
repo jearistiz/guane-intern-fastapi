@@ -9,6 +9,18 @@ class TestDogsRouter(HandleDBTest):
 
     dogs_api_prefix = sttgs.get('API_PREFIX') + sttgs.get('DOGS_API_PREFIX')
 
+    def dogs_name_route(self, name):
+        return self.dogs_api_prefix + '/' + name
+
+    def assert_dogs_data(self, *, reference: dict, compare: dict):
+        assert compare['name'] == reference['name']
+        assert compare['picture'] == reference['picture']
+        assert 'create_date' in compare
+        assert 'id' in compare
+        assert 'picture' in compare
+        assert 'is_adopted' in compare
+        assert 'id_user' in compare
+
     def test_get_dogs(self, app_client: TestClient) -> None:
         response = app_client.get(self.dogs_api_prefix)
         assert response.status_code == 200
@@ -35,63 +47,39 @@ class TestDogsRouter(HandleDBTest):
 
     def test_get_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0]
-        data['create_date'] = str(data['create_date'])
-        get_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        data['create_date'] = data['create_date']
+        get_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.get(get_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_post_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
         data.update({'name': 'Juan'})
-        data['create_date'] = str(data['create_date'])
-        post_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        data['create_date'] = data['create_date']
+        post_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.post(post_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_put_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
         old_name = data['name']
         data.update({'name': 'Juan'})
-        data['create_date'] = str(data['create_date'])
-        post_dogs_name_route = self.dogs_api_prefix + '/' + old_name
-        response = app_client.put(post_dogs_name_route, json=data)
+        data['create_date'] = data['create_date']
+        put_dogs_name_route = self.dogs_name_route(old_name)
+        response = app_client.put(put_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
+        self.assert_dogs_data(reference=data, compare=content)
 
     def test_delete_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0]
-        data['create_date'] = str(data['create_date'])
-        get_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
+        data['create_date'] = data['create_date']
+        get_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.delete(get_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
-        assert content['name'] == data['name']
-        assert content['picture'] == data['picture']
-        assert 'create_date' in content
-        assert 'id' in content
-        assert 'picture' in content
-        assert 'is_adopted' in content
-        assert 'id_user' in content
+        self.assert_dogs_data(reference=data, compare=content)
