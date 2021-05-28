@@ -16,7 +16,7 @@ class TestDogsRouter:
         clean_all_test_tables()
 
     @classmethod
-    def teardown_class():
+    def teardown_class(cls):
         populate_test_tables()
 
     def test_get_dogs(self, app_client: TestClient) -> None:
@@ -47,7 +47,7 @@ class TestDogsRouter:
         data = dogs_mock_dicts[0]
         data['create_date'] = str(data['create_date'])
         get_dogs_name_route = self.dogs_api_prefix + '/' + data.get('name')
-        response = app_client.post(get_dogs_name_route, json=data)
+        response = app_client.get(get_dogs_name_route, json=data)
         assert response.status_code == 200
         content = response.json()
         assert content['name'] == data['name']
