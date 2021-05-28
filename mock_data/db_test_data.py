@@ -4,14 +4,14 @@ from app.schemas import DogInDBBase, UserInDBBase
 from app.db.utils.parse_dicts import parse_dog_dict, parse_user_dict
 from app.services.http_request import get_dog_picture_uri
 
-
-date = 2021, 5, 27, 3, 54, 58, 217637
+# Random date
+date = datetime(2021, 5, 27, 3, 54, 58, 217637)
 
 dogs_info = [
-    [datetime(*date), 'Guane', get_dog_picture_uri(), False, None],
-    [datetime(*date), 'Is', get_dog_picture_uri(), False, None],
-    [datetime(*date), 'Great', get_dog_picture_uri(), True, 1],
-    [datetime(*date), 'Yeah!', get_dog_picture_uri(), True, 2],
+    [date, 'Guane', get_dog_picture_uri(), False, None],
+    [date, 'Thori', get_dog_picture_uri(), False, None],
+    [date, 'CharlieBot', get_dog_picture_uri(), True, 1],
+    [date, 'Fuelai', get_dog_picture_uri(), True, 2],
 ]
 
 dogs_mock_dicts = [
@@ -28,10 +28,10 @@ dogs_mock = [
 ]
 
 users_info = [
-    [datetime(*date), 'Guane1', 'Enterprises', 'info@guane.com.co'],
-    [datetime(*date), 'Guane2', 'CharlieBot', 'CharlieBot@guane.com.co'],
-    [datetime(*date), 'Guane3', 'Thori', 'Thori@guane.com.co'],
-    [datetime(*date), 'Guane4', 'Fuelai', 'Fuelai@guane.com.co'],
+    [date, 'Guane1', 'Enterprises', 'info@guane.com.co'],
+    [date, 'Guane2', 'CharlieBot', 'CharlieBot@guane.com.co'],
+    [date, 'Guane3', 'Thori', 'Thori@guane.com.co'],
+    [date, 'Guane4', 'Fuelai', 'Fuelai@guane.com.co'],
 ]
 
 users_mock_dicts = [

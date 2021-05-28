@@ -26,9 +26,14 @@ def populate_user_table(
             crud.user.create(db, obj_in=user_in)
 
 
-def populate_tables_mock_data(populate: bool = False) -> None:
+def populate_tables_mock_data(
+    populate: bool = False,
+    Session=SessionLocal,
+    dogs_in: List[DogInDBBase] = dogs_mock,
+    users_in: List[UserInDBBase] = users_mock
+) -> None:
     """Populates database table with mock data.
     """
     if populate:
-        populate_user_table()
-        populate_dog_table()
+        populate_user_table(Session, users_in=users_in)
+        populate_dog_table(Session, dogs_in=dogs_in)

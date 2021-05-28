@@ -4,27 +4,23 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
-from app.db.db_manager import create_all_tables, drop_all_tables
-from app.db.utils import populate_dog_table, populate_user_table
-from mock_data.db_test_data import dogs_mock, users_mock
-from .mock.db_session import TestSessionLocal, test_engine
+from app.api.deps import get_db
+from .mock.db_session import (
+    TestSessionLocal,
+    init_test_db,
+    testing_get_db,
+    close_test_db
+)
 
 
 # Setup test DB
 def pytest_sessionstart(session: pytest.Session):
-    # Create all tables
-    create_all_tables(engine=test_engine)
-
-    # Populate User table
-    populate_user_table(Session=TestSessionLocal, users_in=users_mock)
-
-    # Populate Dog table
-    populate_dog_table(Session=TestSessionLocal, dogs_in=dogs_mock)
+    init_test_db()
 
 
 # Delete all tables in test DB
 def pytest_sessionfinish(session: pytest.Session):
-    drop_all_tables(engine=test_engine, drop=True)
+    close_test_db()
 
 
 @pytest.fixture(scope="module")
@@ -37,6 +33,8 @@ def db() -> Generator:
 
 
 @pytest.fixture(scope="module")
-def app_client() -> Generator:
-    with TestClient(app) as c:
+def app_client(db) -> Generator:
+    app.dependency_overrides[get_db] = testing_get_db
+    test_app = TestClient(app)
+    with test_app as c:
         yield c
