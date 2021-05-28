@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 
 from pydantic import BaseModel, EmailStr
 
@@ -39,3 +39,7 @@ class UserInDBBase(UserBase):
 # Properties to return in HTTP response
 class User(UserInDBBase):
     pass
+
+
+class Users(BaseModel):
+    users: List[User]

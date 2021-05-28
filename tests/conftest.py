@@ -6,7 +6,6 @@ from fastapi.testclient import TestClient
 from app.main import app
 from app.db.db_manager import create_all_tables, drop_all_tables
 from app.db.utils import populate_dog_table, populate_user_table
-from app.models.base_class import Base
 from mock_data.db_test_data import dogs_mock, users_mock
 from .mock.db_session import TestSessionLocal, test_engine
 

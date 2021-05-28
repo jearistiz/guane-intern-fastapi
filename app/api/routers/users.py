@@ -3,53 +3,83 @@ from typing import Any
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
+from app import crud, schemas
 from app.api import deps
+from app.api.services.web_crud import WebCRUDWrapper
 
 
 users_router = APIRouter()
 
-
-@users_router.get('/', name='List all users')
-async def get_users(db: Session = Depends(deps.get_db)) -> Any:
-    """Get a list of all ``user`` entities.
-    """
-    return {'hello': 'world'}
+# Web crud was implemented as a wrapper to avoid duplicate code between
+# the two main routers (dogs, users)
+user_web_crud = WebCRUDWrapper(crud.user, enty_name='user')
 
 
-@users_router.get('/{name}', name='User info by name')
+@users_router.get(
+    '/',
+    response_model=schemas.Users,
+    name='List all users',
+)
+async def get_users(
+    db: Session = Depends(deps.get_db)
+) -> Any:
+    return user_web_crud.get_all_entries(db)
+
+
+@users_router.get(
+    '/{name}',
+    response_model=schemas.User,
+    name='User info by name'
+)
 async def get_users_name(
     *,
     db: Session = Depends(deps.get_db),
     name: str
 ) -> Any:
-    """Read one ``user`` entity based on its name
+    """Read one ``user`` entity based on its name.
     """
-    return {'hello': 'world'}
+    return user_web_crud.get_enty_by_name(db, name)
 
 
-@users_router.post('/{name}', name='Save user')
+@users_router.post(
+    '/{name}',
+    response_model=schemas.User,
+    name='Create user'
+)
 async def post_users_name(
     *,
     db: Session = Depends(deps.get_db),
+    user_info: schemas.UserCreate,
     name: str
 ) -> Any:
     """Save one ``user`` entity.
     """
-    return {'hello': 'world'}
+    return user_web_crud.post_enty_by_name(db, name=name, enty_info=user_info)
 
 
-@users_router.put('/{name}', name='Update user by name')
+@users_router.put(
+    '/{name}',
+    response_model=schemas.User,
+    name='Update user by name'
+)
 async def put_users_name(
     *,
     db: Session = Depends(deps.get_db),
+    user_new_info: schemas.UserUpdate,
     name: str
 ) -> Any:
     """Update one ``user`` entity based on its name.
     """
-    return {'hello': 'world'}
+    return user_web_crud.put_enty_by_name(
+        db, name=name, enty_new_info=user_new_info
+    )
 
 
-@users_router.delete('/{name}', name='Delete user by name')
+@users_router.delete(
+    '/{name}',
+    response_model=schemas.User,
+    name='Delete user by name'
+)
 async def delete_users_name(
     *,
     db: Session = Depends(deps.get_db),
@@ -57,4 +87,4 @@ async def delete_users_name(
 ) -> Any:
     """Delete one ``user`` entity based on its name.
     """
-    return {'hello': 'world'}
+    return user_web_crud.delete_enty_by_name(db, name=name)

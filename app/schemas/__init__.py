@@ -1,8 +1,8 @@
 from app.schemas.dog import (
-    DogBase, DogCreate, DogUpdate, DogInDBBase, Dog, Dogs
+    DogBase, DogCreate, DogUpdate, DogInDBBase, Dog, Dogs, AdoptedDogs
 )
 from app.schemas.user import (
-    UserBase, UserCreate, UserUpdate, UserInDBBase, User
+    UserBase, UserCreate, UserUpdate, UserInDBBase, User, Users
 )
 
 
@@ -13,9 +13,11 @@ __all__ = [
     'DogInDBBase',
     'Dog',
     'Dogs',
+    'AdoptedDogs',
     'UserBase',
     'UserCreate',
     'UserUpdate',
     'UserInDBBase',
     'User',
+    'Users',
 ]
