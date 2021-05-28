@@ -30,7 +30,6 @@ class TestUsersRouter(HandleDBTest):
 
     def test_get_users_name(self, app_client: TestClient):
         data = users_mock_dicts[0]
-        data['create_date'] = data['create_date']
         get_users_name_route = self.users_name_route(data.get('name'))
         response = app_client.get(get_users_name_route, json=data)
         assert response.status_code == 200
@@ -40,7 +39,6 @@ class TestUsersRouter(HandleDBTest):
     def test_post_users_name(self, app_client: TestClient):
         data = users_mock_dicts[0].copy()
         data.update({'name': 'Juan'})
-        data['create_date'] = data['create_date']
         post_users_name_route = self.users_name_route(data.get('name'))
         response = app_client.post(post_users_name_route, json=data)
         assert response.status_code == 200
@@ -51,7 +49,6 @@ class TestUsersRouter(HandleDBTest):
         data = users_mock_dicts[0].copy()
         old_name = data['name']
         data.update({'name': 'Juan'})
-        data['create_date'] = data['create_date']
         post_users_name_route = self.users_name_route(old_name)
         response = app_client.put(post_users_name_route, json=data)
         assert response.status_code == 200
@@ -60,7 +57,6 @@ class TestUsersRouter(HandleDBTest):
 
     def test_delete_users_name(self, app_client: TestClient):
         data = users_mock_dicts[0]
-        data['create_date'] = data['create_date']
         get_users_name_route = self.users_name_route(data.get('name'))
         response = app_client.delete(get_users_name_route, json=data)
         assert response.status_code == 200
