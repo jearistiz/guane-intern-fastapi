@@ -30,4 +30,4 @@ drop-all-tables = "python scripts/drop_all_db_tables.py"
 drop-all-test-tables = "python scripts/drop_all_test_db_tables.py"
 
 [requires]
-python_version = "3.9"
+python_version = "3.8"

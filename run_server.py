@@ -14,8 +14,8 @@ if __name__ == '__main__':
     # Run server
     uvicorn.run(
         "app:app",
-        host=sttgs.get('HOST', 'localhost'),
-        port=int(sttgs.get('PORT', 8080)),
+        host=sttgs.get('BACKEND_HOST', 'localhost'),
+        port=int(sttgs.get('BACKEND_PORT', 8080)),
         reload=True,
         debug=True,
         workers=int(sttgs.get('SERVER_WORKERS', 1))

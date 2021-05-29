@@ -133,6 +133,9 @@ dmypy.json
 # Docs
 internal_docs/
 
+# Postgres database
+postgres-data/*
+!postgres-data/empty-file.txt
 
 # Visual Studio Code
 ##############################################################################

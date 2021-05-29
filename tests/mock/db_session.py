@@ -9,7 +9,7 @@ from mock_data.db_test_data import dogs_mock, users_mock
 
 
 test_engine = create_engine(
-    sttgs.get('PGDATA_TESTS'),
+    sttgs.get('POSTGRES_TESTS_URI'),
     pool_pre_ping=True,
     echo=True
 )
