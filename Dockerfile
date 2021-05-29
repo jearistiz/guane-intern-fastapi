@@ -1,4 +1,4 @@
-FROM tiangolo/uvicorn-gunicorn:python3.8
+FROM python:3.9-slim-buster
 EXPOSE ${BACKEND_PORT}
 
 ENV PYTHONUNBUFFERED 1
@@ -13,19 +13,16 @@ COPY mock_data mock_data
 COPY scripts scripts
 COPY tests tests
 COPY .env .
-# COPY Pipfile .
-COPY setup.cfg .
-COPY Pipfile.lock .
-COPY run_server.py .
-COPY setup.py .
-COPY docker-entrypoint.sh .
-COPY pyproject.toml .
-COPY requirements.txt .
+COPY Pipfile .
+COPY setup.cfg ./
+COPY Pipfile.lock ./
+COPY run_server.py ./
+COPY setup.py ./
+COPY pyproject.toml ./
 
-RUN apt-get update
-RUN apt-get -y install sudo
-RUN pip install --no-cache-dir -U pip  &&\
-    sudo pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -U pip
+RUN pip install pipenv
+RUN pipenv install --system --dev
 
 ENTRYPOINT ["/bin/bash"]
-CMD [ "./docker-entrypoint.sh"]
+CMD ["./scripts/docker/docker-entrypoint.sh"]
