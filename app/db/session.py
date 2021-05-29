@@ -7,7 +7,7 @@ from app.config import sttgs
 
 # Creates connection to PostgreSQL
 engine = create_engine(
-    sttgs.get('PGDATA'),
+    sttgs.get('POSTGRES_URI'),
     pool_pre_ping=True,
     echo=True
 )
