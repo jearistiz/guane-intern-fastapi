@@ -1,12 +1,15 @@
 import os
 from shutil import copyfileobj
-from typing import Optional
+from typing import Optional, Union
 from pathlib import Path
 
 
 import requests as req
 
 from app.config import sttgs
+
+
+req_timeout = int(sttgs.get('REQUESTS_TIMEOUT', 20))
 
 
 def get_dog_picture_uri(
@@ -17,7 +20,9 @@ def get_dog_picture_uri(
     if api_uri:
 
         try:
-            r = req.get(api_uri)
+            r = req.get(api_uri, timeout=req_timeout)
+        except req.exceptions.Timeout:
+            return time_out_message(api_uri)
         except Exception:
             return None
 
@@ -38,7 +43,7 @@ def post_file_to_uri(
     file_content: str = 'image/png',
     *,
     message: str
-) -> req.Response:
+) -> Union[req.Response, str]:
     """Post a file to uri."""
     # if file does not exist, post a text file
     os.makedirs(upload_file_path.parent, exist_ok=True)
@@ -59,10 +64,14 @@ def post_file_to_uri(
                 {'message': message}
             )
         }
-        request = req.post(
-            uri,
-            files=files_to_upload
-        )
+        try:
+            request = req.post(
+                uri,
+                files=files_to_upload,
+                timeout=req_timeout,
+            )
+        except req.exceptions.Timeout:
+            return time_out_message(uri)
 
         # Save a copy of the file just to verify that the uploaded object was
         # correctly read
@@ -76,6 +85,10 @@ def post_file_to_uri(
             save_file_copy.truncate()
 
     return request
+
+
+def time_out_message(server):
+    return f'The request to {server} timed out.'
 
 
 example_dog_urls = [

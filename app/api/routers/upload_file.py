@@ -1,7 +1,8 @@
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, HTTPException, status
+import requests as req
 
 from app import schemas
 from app.config import sttgs
@@ -14,7 +15,8 @@ upload_file_router = APIRouter()
 
 @upload_file_router.post(
     '/file-to-guane',
-    response_model=schemas.UploadFileStatus
+    response_model=schemas.UploadFileStatus,
+    status_code=status.HTTP_201_CREATED,
 )
 async def post_file_to_guane(client_req: Request) -> Any:
     """With an empy body request to this endpoint, the api sends a a locally
@@ -26,10 +28,27 @@ async def post_file_to_guane(client_req: Request) -> Any:
         this_file_path,
         sttgs.get('UPLOAD_FILE_PATH')
     )
+
     upload_req = post_file_to_uri(
         upload_file_path,
         message='Hello, guane. This is Juan Esteban Aristizabal!'
     )
+
+    # If timeout in upload_request
+    if not isinstance(upload_req, req.Response):
+        if upload_req:
+            raise HTTPException(
+                502,
+                detail={
+                    'success': False,
+                    'remote_server_response': None,
+                    'remote_server_status_code': None,
+                    'message': upload_req
+                }
+            )
+        else:
+            raise HTTPException(502)
+
     return {
         'success': True if upload_req.status_code == 201 else False,
         'remote_server_response': upload_req.json(),
