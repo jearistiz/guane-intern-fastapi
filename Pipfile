@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+app = {editable = true, path = "."}
 fastapi = "*"
 sqlalchemy = "*"
 uvicorn = "*"
@@ -17,20 +18,19 @@ typer = "*"
 pytest = "*"
 pytest-cov = "*"
 flake8 = "*"
-app = {editable = true, path = "."}
+
 
 [scripts]
 
-# Init server
-server = "python ./scripts/server/run_server.py"
-server-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
-server-local = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+# Init server with local database using $POSTGRES_LOCAL_URI defined in ~/.env
+server = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+server-docker = "python ./scripts/server/run_server.py"
+server-docker-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
 
 # Tests
-tests = "python -m pytest tests"
-tests-log = "python -m pytest tests --capture=tee-sys"
-tests-cov = "python -m pytest tests --cov app"
-tests-cov-html = "python -m pytest tests --cov-report html --cov app"
+tests = "python scripts/app/run_tests.py"
+tests-log = "python scripts/app/run_tests.py --print-all"
+tests-html = "python scripts/app/run_tests.py --cov-html"
 
 # Linting - style
 linter = "flake8 app/ tests/ scripts/ mock_data/"

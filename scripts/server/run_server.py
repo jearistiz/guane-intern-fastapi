@@ -50,9 +50,11 @@ def run_uvicorn_server(
     from app.db.db_manager import create_all_tables, drop_all_tables
     from app.db.utils import populate_tables_mock_data
 
+    # Tables need to be created, always
+    create_all_tables()
+
+    # Optionally populate tables
     if populate_tables:
-        # Initialize database
-        create_all_tables()
         populate_tables_mock_data(populate=True)
 
     # Run server
@@ -62,9 +64,10 @@ def run_uvicorn_server(
         port=int(sttgs.get('BACKEND_PORT', 8080)),
         reload=True,
         debug=True,
-        workers=int(sttgs.get('SERVER_WORKERS', 1))
+        workers=int(sttgs.get('SERVER_WORKERS', 1)),
     )
 
+    # Optionally drop tables
     drop_all_tables(drop=drop_tables)
 
 
