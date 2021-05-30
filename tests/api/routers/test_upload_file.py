@@ -10,7 +10,7 @@ upload_file_uri = (
 
 def test_post_file_to_guane(app_client: TestClient):
     response = app_client.post(upload_file_uri)
-    assert response.status_code == 200
+    assert response.status_code == 201
     content = response.json()
     assert content['success'] is True
     assert content['remote_server_status_code'] == 201

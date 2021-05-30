@@ -29,7 +29,7 @@ $ docker exec -it <Container ID> bash
 When you are already inside the container, move to the ``/app`` directory and run
 
 ```bash
-$ python -m test pytests
+$ python scripts/app/run_tests.py --docker
 ```
 
 ![architecture](img/arch.png)

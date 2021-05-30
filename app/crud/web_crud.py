@@ -90,7 +90,7 @@ class WebCRUDWrapper:
             raise HTTPException(
                 500,
                 f'Error while updating {self.enty_name} \'{name}\' in '
-                'database. Probably the {self.enty_name} does not exist in '
+                f'database. Probably the {self.enty_name} does not exist in '
                 'database.'
             )
 

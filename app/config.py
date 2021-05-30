@@ -1,4 +1,11 @@
-from dotenv import dotenv_values
+import os
+from pathlib import Path
+
+from dotenv import load_dotenv
 
 
-sttgs = dotenv_values('.env')
+dotenv_path = Path(__file__).resolve().parent / '..' / '.env'
+
+load_dotenv(dotenv_path)
+
+sttgs = os.environ

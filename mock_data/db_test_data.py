@@ -2,16 +2,16 @@ from datetime import datetime
 
 from app.schemas import DogInDBBase, UserInDBBase
 from app.db.utils.parse_dicts import parse_dog_dict, parse_user_dict
-from app.services.http_request import get_dog_picture_uri
+from app.services.http_request import example_dog_urls
 
 # Random date
 date = str(datetime(2021, 5, 27, 3, 54, 58, 217637))
 
 dogs_info = [
-    [date, 'Guane', get_dog_picture_uri(), False, None],
-    [date, 'Thori', get_dog_picture_uri(), False, None],
-    [date, 'CharlieBot', get_dog_picture_uri(), True, 1],
-    [date, 'Fuelai', get_dog_picture_uri(), True, 2],
+    [date, 'Guane', example_dog_urls[0], False, None],
+    [date, 'Thori', example_dog_urls[1], False, None],
+    [date, 'CharlieBot', example_dog_urls[2], True, 1],
+    [date, 'Fuelai', example_dog_urls[3], True, 2],
 ]
 
 dogs_mock_dicts = [

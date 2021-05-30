@@ -4,6 +4,7 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+app = {editable = true, path = "."}
 fastapi = "*"
 sqlalchemy = "*"
 uvicorn = "*"
@@ -11,23 +12,33 @@ python-dotenv = "*"
 requests = "*"
 psycopg2-binary = "*"
 email-validator = "*"
+typer = "*"
 
 [dev-packages]
 pytest = "*"
 pytest-cov = "*"
 flake8 = "*"
-app = {editable = true, path = "."}
+
 
 [scripts]
-tests = "python -m pytest tests"
-tests-log = "python -m pytest tests --capture=tee-sys"
-tests-cov = "python -m pytest tests --cov app"
-tests-cov-html = "python -m pytest tests --cov-report html --cov app"
+
+# Init server with local database using $POSTGRES_LOCAL_URI defined in ~/.env
+server = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+server-docker = "python ./scripts/server/run_server.py"
+server-docker-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
+
+# Tests
+tests = "python scripts/app/run_tests.py"
+tests-log = "python scripts/app/run_tests.py --print-all"
+tests-html = "python scripts/app/run_tests.py --cov-html"
+
+# Linting - style
 linter = "flake8 app/ tests/ scripts/ mock_data/"
-server = "python run_server.py"
+
+# Database
 # WARNING: running the following scripts may cause inevitable loss of information
 drop-all-tables = "python scripts/drop_all_db_tables.py"
 drop-all-test-tables = "python scripts/drop_all_test_db_tables.py"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"

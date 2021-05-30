@@ -4,13 +4,13 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from app.schemas.base_config import ConfigBase
-from app.services.http_request import get_dog_picture_uri
+from app.services.http_request import example_dog_urls
 
 
 # Shared properties
 class DogBase(BaseModel):
     name: Optional[str]
-    picture: Optional[str] = get_dog_picture_uri()
+    picture: Optional[str] = example_dog_urls[0]
     is_adopted: Optional[bool]
     id_user: Optional[int]
 
