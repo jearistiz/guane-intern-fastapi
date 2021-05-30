@@ -16,7 +16,6 @@ COPY .env .
 COPY Pipfile .
 COPY setup.cfg ./
 COPY Pipfile.lock ./
-COPY run_server.py ./
 COPY setup.py ./
 COPY pyproject.toml ./
 

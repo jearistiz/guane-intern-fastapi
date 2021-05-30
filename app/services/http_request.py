@@ -76,3 +76,11 @@ def post_file_to_uri(
             save_file_copy.truncate()
 
     return request
+
+
+example_dog_urls = [
+    "https://images.dog.ceo/breeds/retriever-golden/nina.jpg",
+    "https://images.dog.ceo/breeds/papillon/n02086910_1613.jpg",
+    "https://images.dog.ceo/breeds/buhund-norwegian/hakon1.jpg",
+    "https://images.dog.ceo/breeds/terrier-toy/n02087046_4409.jpg",
+]

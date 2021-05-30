@@ -11,6 +11,7 @@ python-dotenv = "*"
 requests = "*"
 psycopg2-binary = "*"
 email-validator = "*"
+typer = "*"
 
 [dev-packages]
 pytest = "*"
@@ -19,15 +20,25 @@ flake8 = "*"
 app = {editable = true, path = "."}
 
 [scripts]
+
+# Init server
+server = "python ./scripts/server/run_server.py"
+server-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
+sever-local = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+
+# Tests
 tests = "python -m pytest tests"
 tests-log = "python -m pytest tests --capture=tee-sys"
 tests-cov = "python -m pytest tests --cov app"
 tests-cov-html = "python -m pytest tests --cov-report html --cov app"
+
+# Linting - style
 linter = "flake8 app/ tests/ scripts/ mock_data/"
-server = "python run_server.py"
+
+# Database
 # WARNING: running the following scripts may cause inevitable loss of information
 drop-all-tables = "python scripts/drop_all_db_tables.py"
 drop-all-test-tables = "python scripts/drop_all_test_db_tables.py"
 
 [requires]
-python_version = "3.8"
+python_version = "3.9"
