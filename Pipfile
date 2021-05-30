@@ -24,7 +24,7 @@ app = {editable = true, path = "."}
 # Init server
 server = "python ./scripts/server/run_server.py"
 server-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
-sever-local = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+server-local = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
 
 # Tests
 tests = "python -m pytest tests"
