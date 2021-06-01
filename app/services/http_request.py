@@ -12,7 +12,7 @@ from app.config import sttgs
 req_timeout = int(sttgs.get('REQUESTS_TIMEOUT', 20))
 
 
-def get_dog_picture_uri(
+def get_dog_picture(
     api_uri: Optional[str] = sttgs.get('DOG_API_URI')
 ) -> Optional[str]:
     """Returns None if an exception occurs.

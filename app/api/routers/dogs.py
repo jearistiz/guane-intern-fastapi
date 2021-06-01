@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas, crud
 from app.api import deps
+from app.services.http_request import get_dog_picture
 
 
 dogs_router = APIRouter()
@@ -73,8 +74,12 @@ async def post_dogs_name(
     dog_info: schemas.DogCreate,
     name: str
 ) -> Any:
-    """Save one ``dog`` entity.
+    """Save one ``dog`` entity. Don't include the field `picture` in your
+    request if you want the backend to fill it with a random dog picture URL
+    link.
     """
+    if dog_info.picture is None:
+        dog_info.picture = get_dog_picture()
     return dog_web_crud.post_enty_by_name(db, name=name, enty_info=dog_info)
 
 
