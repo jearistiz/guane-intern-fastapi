@@ -2,7 +2,7 @@ from datetime import datetime
 
 from app.schemas import DogInDBBase, UserInDBBase
 from app.db.utils.parse_dicts import parse_dog_dict, parse_user_dict
-from app.services.http_request import example_dog_urls
+from app.utils.http_request import example_dog_urls
 
 # Random date
 date = str(datetime(2021, 5, 27, 3, 54, 58, 217637))

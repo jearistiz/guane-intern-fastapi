@@ -6,8 +6,8 @@ import requests as req
 
 from app import schemas
 from app.config import sttgs
-from app.services.http_request import post_file_to_uri
-from app.services.paths import join_relative_path
+from app.utils.http_request import post_file_to_uri
+from app.utils.paths import join_relative_path
 
 
 upload_file_router = APIRouter()

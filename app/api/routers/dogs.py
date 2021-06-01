@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas, crud
 from app.api import deps
-from app.services.http_request import get_dog_picture
+from app.utils.http_request import get_dog_picture
 
 
 dogs_router = APIRouter()

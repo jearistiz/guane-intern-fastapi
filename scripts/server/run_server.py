@@ -3,14 +3,15 @@
 Run ``python run_server.py --help`` to see the options.
 """
 import os
+from typing import Optional
 from typer import Typer, Option
 
 
 cli_app = Typer()
 
 
-run_uvicorn_server_help = (
-    "Run the FastAPI "
+port_help = (
+    'Set the port of the uvicorn server.'
 )
 local_help = (
     "Run the uvicorn server using $POSTGRES_LOCAL_URI set in ~/.env"
@@ -27,6 +28,7 @@ drop_tables_help = (
 
 @cli_app.command()
 def run_uvicorn_server(
+    port: Optional[int] = Option(None, help=port_help),
     local_db: bool = Option(False, help=local_help),
     populate_tables: bool = Option(False, help=populate_tables_help),
     drop_tables: bool = Option(False, help=drop_tables_help)
@@ -57,11 +59,13 @@ def run_uvicorn_server(
     if populate_tables:
         populate_tables_mock_data(populate=True)
 
+    backend_port = port if port else sttgs.get('BACKEND_PORT', 8080)
+
     # Run server
     uvicorn.run(
         "app.main:app",
         host=sttgs.get('BACKEND_HOST', 'localhost'),
-        port=int(sttgs.get('BACKEND_PORT', 8080)),
+        port=int(backend_port),
         reload=True,
         debug=True,
         workers=int(sttgs.get('SERVER_WORKERS', 1)),

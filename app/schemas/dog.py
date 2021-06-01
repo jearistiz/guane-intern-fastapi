@@ -30,8 +30,8 @@ class DogInDBBase(DogBase):
     id: Optional[int]
     create_date: Optional[datetime] = datetime.utcnow()
     name: str
-    picture: str
-    is_adopted: bool
+    picture: Optional[str]
+    is_adopted: Optional[bool]
     id_user: Optional[int]
 
     class Config:

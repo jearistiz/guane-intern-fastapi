@@ -14,7 +14,6 @@ class TestDogsRouter(HandleDBTest):
 
     def assert_dogs_data(self, *, reference: dict, compare: dict):
         assert compare['name'] == reference['name']
-        assert compare['picture'] == reference['picture']
         assert 'create_date' in compare
         assert 'id' in compare
         assert 'picture' in compare
@@ -56,6 +55,7 @@ class TestDogsRouter(HandleDBTest):
     def test_post_dogs_name(self, app_client: TestClient) -> None:
         data = dogs_mock_dicts[0].copy()
         data.update({'name': 'Juan'})
+        data['picture'] = None
         post_dogs_name_route = self.dogs_name_route(data.get('name'))
         response = app_client.post(post_dogs_name_route, json=data)
         assert response.status_code == 200
