@@ -5,7 +5,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app
 from app.api.deps import get_db
-from .mock.db_session import (
+from tests.mock.db_session import (
     TestSessionLocal,
     init_test_db,
     testing_get_db,
