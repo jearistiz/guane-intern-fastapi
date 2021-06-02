@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import crud, schemas
 from app.api import deps
+from app.crud import superuser_crud
 
 
 users_router = APIRouter()
@@ -49,7 +50,10 @@ async def post_users_name(
     *,
     db: Session = Depends(deps.get_db),
     user_info: schemas.UserCreate,
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     """Save one ``user`` entity.
     """
@@ -65,7 +69,10 @@ async def put_users_name(
     *,
     db: Session = Depends(deps.get_db),
     user_new_info: schemas.UserUpdate,
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     """Update one ``user`` entity based on its name.
     """
@@ -82,7 +89,10 @@ async def put_users_name(
 async def delete_users_name(
     *,
     db: Session = Depends(deps.get_db),
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     """Delete one ``user`` entity based on its name.
     """

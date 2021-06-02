@@ -1,16 +1,17 @@
-from typing import Generator
+from typing import Generator, Dict
 
 import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
 from app.api.deps import get_db
-from .mock.db_session import (
+from tests.mock.db_session import (
     TestSessionLocal,
     init_test_db,
     testing_get_db,
     close_test_db
 )
+from tests.utils.security import get_superuser_token_headers
 
 
 # Setup test DB
@@ -38,3 +39,8 @@ def app_client(db) -> Generator:
     test_app = TestClient(app)
     with test_app as c:
         yield c
+
+
+@pytest.fixture(scope="function")
+def superuser_token_headers(app_client: TestClient) -> Dict[str, str]:
+    return get_superuser_token_headers(app_client)
