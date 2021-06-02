@@ -28,9 +28,9 @@ server = "python ./scripts/server/run_server.py --local-db --populate-tables --d
 server-docker = "python ./scripts/server/run_server.py"
 server-docker-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
 # Tests
-tests = "python scripts/app/run_tests.py"
-tests-log = "python scripts/app/run_tests.py --print-all"
-tests-html = "python scripts/app/run_tests.py --cov-html"
+tests = "python scripts/app/run_tests.py --no-docker"
+tests-log = "python scripts/app/run_tests.py --no-docker --print-all"
+tests-html = "python scripts/app/run_tests.py --no-docker --cov-html"
 # Linting - style
 linter = "flake8 app/ tests/ scripts/ mock_data/"
 # Database

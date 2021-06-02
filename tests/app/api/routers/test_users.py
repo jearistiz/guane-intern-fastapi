@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi.testclient import TestClient
 
 from app.config import sttgs
@@ -36,29 +38,41 @@ class TestUsersRouter(HandleDBTest):
         content = response.json()
         self.assert_users_data(reference=data, compare=content)
 
-    def test_post_users_name(self, app_client: TestClient):
+    def test_post_users_name(
+        self, app_client: TestClient, superuser_token_headers: Dict[str, str]
+    ) -> None:
         data = users_mock_dicts[0].copy()
         data.update({'name': 'Juan'})
         post_users_name_route = self.users_name_route(data.get('name'))
-        response = app_client.post(post_users_name_route, json=data)
+        response = app_client.post(
+            post_users_name_route, json=data, headers=superuser_token_headers
+        )
         assert response.status_code == 200
         content = response.json()
         self.assert_users_data(reference=data, compare=content)
 
-    def test_put_users_name(self, app_client: TestClient):
+    def test_put_users_name(
+        self, app_client: TestClient, superuser_token_headers: Dict[str, str]
+    ) -> None:
         data = users_mock_dicts[0].copy()
         old_name = data['name']
         data.update({'name': 'Juan'})
         post_users_name_route = self.users_name_route(old_name)
-        response = app_client.put(post_users_name_route, json=data)
+        response = app_client.put(
+            post_users_name_route, json=data, headers=superuser_token_headers
+        )
         assert response.status_code == 200
         content = response.json()
         self.assert_users_data(reference=data, compare=content)
 
-    def test_delete_users_name(self, app_client: TestClient):
+    def test_delete_users_name(
+        self, app_client: TestClient, superuser_token_headers: Dict[str, str]
+    ) -> None:
         data = users_mock_dicts[0]
         get_users_name_route = self.users_name_route(data.get('name'))
-        response = app_client.delete(get_users_name_route, json=data)
+        response = app_client.delete(
+            get_users_name_route, json=data, headers=superuser_token_headers
+        )
         assert response.status_code == 200
         content = response.json()
         self.assert_users_data(reference=data, compare=content)

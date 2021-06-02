@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 
 from app import schemas, crud
 from app.api import deps
+from app.crud import superuser_crud
 from app.utils.http_request import get_dog_picture
 
 
@@ -66,13 +67,16 @@ async def get_dogs_name(
 @dogs_router.post(
     '/{name}',
     response_model=schemas.Dog,
-    name='Save one dog.'
+    name='Save one dog.',
 )
 async def post_dogs_name(
     *,
     db: Session = Depends(deps.get_db),
     dog_info: schemas.DogCreate,
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     """Save one ``dog`` entity. Don't include the field `picture` in your
     request if you want the backend to fill it with a random dog picture URL
@@ -92,7 +96,10 @@ async def put_dogs_name(
     *,
     db: Session = Depends(deps.get_db),
     dog_new_info: schemas.DogUpdate,
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     """Update one ``dog`` entity based on its name.
     """
@@ -109,6 +116,9 @@ async def put_dogs_name(
 async def delete_dogs_name(
     *,
     db: Session = Depends(deps.get_db),
-    name: str
+    name: str,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
 ) -> Any:
     return dog_web_crud.delete_enty_by_name(db, name=name)
