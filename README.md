@@ -26,9 +26,13 @@ If you have an older Docker version which does not support the ``$ docker compos
 $ docker-compose up --build
 ```
 
-At this moment the docker-compose.yml is configured to create an image of the application and an image of PostgreSQL 13. To see the app working sound and safe, visit the URI ``0.0.0.0:8080/docs`` or the equivalent URI you defined in the ``~/.env`` file given by the format ``${BACKEND_HOST}:${BACKEND_PORT}/docs`` and start sending HTTP requests to the application.
+At this moment the docker-compose.yml is configured to create an image of the application and an image of PostgreSQL 13. To see the app working sound and safe, visit the URI ``0.0.0.0:8080/docs`` or the equivalent URI you defined in the ``~/.env`` file (use the format ``${BACKEND_HOST}:${BACKEND_PORT}/docs``) and start sending HTTP requests to the application via this nice interactive documentation view, brought to us automatically thanks to FastAPI integration with OpenAPI
 
-In order to use the POST, PUT or DELETE endpoints you should first authenticate at the top right of the application docs (``0.0.0.0:8080/docs``) in the button that reads ``Authenticate``. I have set up this two super users for you to test these endpoints:
+<p align="center">
+  <img src="img/docs.png" alt="architecture" width="400"/>
+</p>
+
+In order to use the POST, PUT or DELETE endpoints you should first authenticate at the top right of the application docs (``0.0.0.0:8080/docs``) in the button that reads ``Authenticate``. I have set up this two super users for you to test these endpoints, use the one you are more comfortable with ;)
 
 ```md
 user: guane
@@ -43,6 +47,14 @@ password: ilovecharliebot
 ```
 
 If other fields are required in the authentication form, please leave them empty.
+
+## Notes on the database relations
+
+Please consider the following notes when trying to make requests to the app:
+
+- The ``dog`` and ``user`` relations are connected by the field ``id_user`` defined in the ``dog`` relation (this is done via foreign key deifinition). Make sure the entity ``user`` with ``id = id_example`` is created before the dog with ``id_user = id_example``.
+- If you want to manually define the ``id`` field in the ``user`` and ``dog`` relations, make sure there is no other entity within the relation with the same ``id``.
+  - The best thing is to just let the backend define the ``id`` fields for you, so just don't include these in the HTTP request when trying to insert or update the entities via POST or PUT methods.
 
 Thats it for deploying and manually testing the endpoints.
 
@@ -62,13 +74,17 @@ Afterwards, run a bash shell using this command
 $ docker exec -it <Container ID> bash
 ```
 
-When you are already inside the container, make sure you are already placed in the ``/app``  directory (you can check this with ``$ pwd``... if not, execute ``$ mv /app``), and execute the following command:
+When you are already inside the container's bash shell, make sure you are located in the ``/app``  directory (you can check this if ``$ pwd`` prints out ``/app``... if not, execute ``$ mv /app``), and execute the following command:
 
 ```bash
 $ python scripts/app/run_tests.py
 ```
 
-There are some options for this testing initialization script (which underneath uses ``pytest``) such as ``--cov-html`` which will generate an html report of the coverage testing. If you want to see all the options just run ``$ python scripts/app/run_tests.py --help``.
+There are some options for this testing initialization script (which underneath uses ``pytest``) such as ``--cov-html`` which will generate an html report of the coverage testing. If you want to see all the options just run ``$ python scripts/app/run_tests.py --help``. And test using your own options.
+
+## Deploy without using Docker
+
+The application can also be 'deployed' locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here.
 
 ## References
 
