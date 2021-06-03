@@ -1,18 +1,32 @@
 # FastAPI - PostgreSQL - Celery - Rabbitmq backend
 
-This source code tries to implement the following architecture:
+This source code implements the following architecture:
 
 <p align="center">
   <img src="img/arch.png" alt="architecture" width="400"/>
 </p>
 
-At this point the python and database containers are dockerized as well as implemented. The missing parts are the celery-related containers and implementation.
+All the required database endpoints are implemented and tested. These include crud operations for ``dog`` and ``user`` PostgreSQL relations. The asynchronous tasks are queued via one endpoint, and the upload of files to guane internal test server (external API) is implemented as another endpoint.
 
-On the other side, all the required endpoints are implemented and tested.
+This app also executes HTTP requests to another external endpoint located at <https://dog.ceo/api/breeds/image/random> which returns a message with an URL to a random dog picture. The URL is stored as the field ``picture`` in the ``dog`` relation.
 
 ## Deploy using Docker
 
-To deploy this project using docker make sure you have cloned this repository, and installed Docker.
+To deploy this project using docker make sure you have cloned this repository
+
+```bash
+$ git clone https://github.com/jearistiz/guane-intern-fastapi
+```
+
+and installed Docker.
+
+Now move to the project root directory
+
+```bash
+$ mv guane-intern-fastapi
+```
+
+Unless otherwise stated, all the commands should be executed from the project root directory denoted as ``~/``.
 
 To run the docker images just prepare your environment variables in the ``~/.env`` file and run
 
@@ -26,13 +40,13 @@ If you have an older Docker version which does not support the ``$ docker compos
 $ docker-compose up --build
 ```
 
-At this moment the docker-compose.yml is configured to create an image of the application and an image of PostgreSQL 13. To see the app working sound and safe, visit the URI ``0.0.0.0:8080/docs`` or the equivalent URI you defined in the ``~/.env`` file (use the format ``${BACKEND_HOST}:${BACKEND_PORT}/docs``) and start sending HTTP requests to the application via this nice interactive documentation view, brought to us automatically thanks to FastAPI integration with OpenAPI
+The docker-compose.yml is configured to create an image of the application named ``application/backend``, an image of PostgreSQL v13.3 –named ``postgres``–, an image of RabbitMQ v3.8 –``rabbitmq``– and an image of Redis v6.2 –``reddis``. To see the application working sound and safe, visit the URI ``0.0.0.0:8080/docs`` or the equivalent URI you defined in the ``~/.env`` file (use the format ``${BACKEND_HOST}:${BACKEND_PORT}/docs``) and start sending HTTP requests to the application via this nice interactive documentation view, brought to us automatically thanks to FastAPI integration with OpenAPI
 
 <p align="center">
   <img src="img/docs.png" alt="architecture" width="400"/>
 </p>
 
-In order to use the POST, PUT or DELETE endpoints you should first authenticate at the top right of the application docs (``0.0.0.0:8080/docs``) in the button that reads ``Authenticate``. I have set up this two super users for you to test these endpoints, use the one you are more comfortable with ;)
+In order to use the POST, PUT or DELETE endpoints you should first authenticate at the top right of the application docs (``0.0.0.0:8080/docs``) in the button that reads ``Authorize``. I have set up this two super users for you to test these endpoints, use the one you feel more comfortable with ;)
 
 ```md
 user: guane
@@ -84,7 +98,7 @@ There are some options for this testing initialization script (which underneath 
 
 ## Deploy without using Docker
 
-The application can also be 'deployed' locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here.
+The application can also be deployed locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here.
 
 ## References
 
