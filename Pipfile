@@ -16,6 +16,8 @@ typer = "*"
 python-jose = {extras = ["cryptography"], version = "*"}
 passlib = {extras = ["bcrypt"], version = "*"}
 python-multipart = "*"
+celery = "*"
+redis = "*"
 
 [dev-packages]
 pytest = "*"
@@ -24,7 +26,7 @@ flake8 = "*"
 
 [scripts]
 # Init server with local database using $POSTGRES_LOCAL_URI defined in ~/.env
-server = "python ./scripts/server/run_server.py --local-db --populate-tables --drop-tables"
+server = "python ./scripts/server/run_server.py --no-docker --populate-tables --drop-tables --auto-reload-server"
 server-docker = "python ./scripts/server/run_server.py"
 server-docker-with-data = "python ./scripts/server/run_server.py --populate-tables --drop-tables"
 # Tests

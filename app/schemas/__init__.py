@@ -11,6 +11,7 @@ from app.schemas.security import (
     SuperUser,
     SuperUserInDB,
 )
+from app.schemas.tasks import CeleryTaskResponse
 
 __all__ = [
     'DogBase',
@@ -31,4 +32,5 @@ __all__ = [
     'TokenData',
     'SuperUser',
     'SuperUserInDB',
+    'CeleryTaskResponse',
 ]

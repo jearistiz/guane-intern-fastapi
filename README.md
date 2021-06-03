@@ -36,8 +36,8 @@ In order to use the POST, PUT or DELETE endpoints you should first authenticate 
 
 ```md
 user: guane
-password: ilovethoriai
-````
+password: ilovethori
+```
 
 or
 

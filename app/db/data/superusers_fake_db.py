@@ -6,8 +6,8 @@ superusers_db = {
     'guane': {
         "username": "guane",
         "full_name": "guane enterprises",
-        # password: ilovethoriai
-        "hashed_password": "$2b$12$EGs45f6zAwJDgFDe6TstM.6jaktS4BmlVnSBQ/VD.XQTzErtQrmRG",  # noqa
+        # password: ilovethori
+        "hashed_password": "$2b$12$ESVIIGyxIcIPaYsZuSKIFOmqwTMbtePT6GnoKf0ufwDjoietMVauO",  # noqa
         "disabled": False
     },
     'juanes': {
