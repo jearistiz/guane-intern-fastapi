@@ -1,3 +1,5 @@
+from typing import Dict
+
 from fastapi.testclient import TestClient
 
 from app.config import sttgs
@@ -8,8 +10,14 @@ upload_file_uri = (
 )
 
 
-def test_post_file_to_guane(app_client: TestClient):
-    response = app_client.post(upload_file_uri)
+def test_post_file_to_guane(
+    app_client: TestClient,
+    superuser_token_headers: Dict[str, str]
+):
+    response = app_client.post(
+        upload_file_uri,
+        headers=superuser_token_headers
+    )
     assert response.status_code == 201
     content = response.json()
     assert content['success'] is True

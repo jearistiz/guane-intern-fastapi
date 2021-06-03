@@ -1,11 +1,12 @@
 from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Request, HTTPException, status
+from fastapi import APIRouter, Request, Depends, HTTPException, status
 import requests as req
 
 from app import schemas
 from app.config import sttgs
+from app.crud import superuser_crud
 from app.utils.http_request import post_file_to_uri
 from app.utils.paths import join_relative_path
 
@@ -18,7 +19,12 @@ upload_file_router = APIRouter()
     response_model=schemas.UploadFileStatus,
     status_code=status.HTTP_201_CREATED,
 )
-async def post_file_to_guane(client_req: Request) -> Any:
+async def post_file_to_guane(
+    client_req: Request,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
+) -> Any:
     """With an empy body request to this endpoint, the api sends a a locally
     stored file to a previously defined endpoint (in this case, guane's test
     api).
