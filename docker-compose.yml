@@ -1,10 +1,16 @@
 version: "3.5"
 services:
   backend_app:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: backend_app
+    stop_signal: SIGINT
     env_file: .env
     image: app/backend
+    depends_on: 
+      - postgres
+      - celery
     ports:
       - "${BACKEND_PORT}:${BACKEND_PORT}"
     volumes:
@@ -14,9 +20,26 @@ services:
     container_name: postgres
     image: postgres:13.3
     restart: always
+    env_file: .env
     environment:
         POSTGRES_USER: ${POSTGRES_USER}
         POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
         POSTGRES_DB: ${POSTGRES_DB}
     ports:
         - ${POSTGRES_PORT}:${POSTGRES_PORT}
+
+  rabbitmq:
+    image: rabbitmq:3.8
+    container_name: rabbitmq
+    env_file: .env
+    environment:
+        RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER}
+        RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS}
+    ports:
+        - "${RABBITMQ_PORT}:${RABBITMQ_PORT}"
+        - "${RABBITMQ_PORT_2}:${RABBITMQ_PORT_2}"
+
+  redis:
+    image: redis:6.2
+    container_name: redis
+  

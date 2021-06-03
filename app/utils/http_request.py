@@ -1,8 +1,7 @@
 import os
 from shutil import copyfileobj
-from typing import Optional, Union
+from typing import Any, Dict, List, Optional, Union
 from pathlib import Path
-
 
 import requests as req
 
@@ -22,7 +21,7 @@ def get_dog_picture(
         try:
             r = req.get(api_uri, timeout=req_timeout)
         except req.exceptions.Timeout:
-            return time_out_message(api_uri)
+            return time_out_message(api_uri, req_timeout)
         except Exception:
             return None
 
@@ -71,7 +70,7 @@ def post_file_to_uri(
                 timeout=req_timeout,
             )
         except req.exceptions.Timeout:
-            return time_out_message(uri)
+            return time_out_message(uri, req_timeout)
 
         # Save a copy of the file just to verify that the uploaded object was
         # correctly read
@@ -87,8 +86,30 @@ def post_file_to_uri(
     return request
 
 
-def time_out_message(server):
-    return f'The request to {server} timed out.'
+def post_to_uri(
+    api_uri: str,
+    message: Dict[str, Any],
+    expected_status_codes: List[int] = [200, 201]
+) -> Optional[req.Response]:
+    try:
+        response = req.post(api_uri, data=message, timeout=req_timeout)
+    except req.exceptions.Timeout:
+        raise req.exceptions.Timeout(time_out_message(api_uri))
+
+    data_json = response.json()
+
+    status_code_is_not_expected = (
+        response.status_code not in expected_status_codes
+    )
+
+    if status_code_is_not_expected or (not isinstance(data_json, dict)):
+        return None
+
+    return response
+
+
+def time_out_message(server, secs: int):
+    return f'The request to {server} timed out after {secs} seconds.'
 
 
 example_dog_urls = [

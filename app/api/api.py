@@ -6,6 +6,7 @@ from app.api.routers import (
     users_router,
     upload_file_router,
     security_router,
+    tasks_router
 )
 
 
@@ -16,6 +17,11 @@ api_router.include_router(
     security_router,
     prefix=sttgs.get('SECURITY_PREFIX', '/security'),
     tags=['security']
+)
+api_router.include_router(
+    tasks_router,
+    prefix=sttgs.get('CELERY_TASKS_PREFIX', '/tasks'),
+    tags=['celery tasks']
 )
 api_router.include_router(
     dogs_router,

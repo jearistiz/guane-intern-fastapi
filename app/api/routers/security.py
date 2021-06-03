@@ -22,7 +22,7 @@ async def login_for_access_token(  # noqa
     """Try to get the token with one of this two superusers:
 
     user: guane
-    password: ilovethoriai
+    password: ilovethori
 
     or
 
