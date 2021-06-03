@@ -100,6 +100,10 @@ There are some options for this testing initialization script (which underneath 
 
 The application can also be deployed locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here.
 
+## Code quality
+
+The developement process has been carefully monitored using the sonarcloud engine available at <https://sonarcloud.io/dashboard?id=jearistiz_guane-intern-fastapi>. Flake8 linter has also been used thoroughly for code style and pytest to ensure the code is working as expected.
+
 ## References
 
 This app was developed using as main reference [@tiangolo](https://github.com/tiangolo)'s [FastAPI documentation](https://fastapi.tiangolo.com/) and his [Full stack, modern web application generator](https://github.com/tiangolo/full-stack-fastapi-postgresql), which are both distributed under an MIT License. Some parts of this source code are literal code blocks from the cited references.
