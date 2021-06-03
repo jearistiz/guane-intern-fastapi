@@ -1,9 +1,10 @@
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from app import schemas
 from app.config import sttgs
+from app.crud import superuser_crud
 from app.worker.celery_tasks import task_post_to_uri
 
 
@@ -11,7 +12,13 @@ tasks_router = APIRouter()
 
 
 @tasks_router.post('/celery_task', response_model=schemas.CeleryTaskResponse)
-def celery_task(task_complexity: int, request: Request) -> Any:
+def celery_task(
+    task_complexity: int,
+    request: Request,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
+) -> Any:
     response = {
         'task_complexity': task_complexity
     }
@@ -32,7 +39,13 @@ def celery_task(task_complexity: int, request: Request) -> Any:
     '/celery_task_not_async',
     response_model=schemas.CeleryTaskResponse
 )
-def celery_task_not_async(task_complexity: int, request: Request) -> Any:
+def celery_task_not_async(
+    task_complexity: int,
+    request: Request,
+    current_superuser: schemas.SuperUser = Depends(
+        superuser_crud.get_current_active_user
+    )
+) -> Any:
     """Same functionality as last endpoint but this one returns the external
     server (guane's) response completely at the expense of loosing the async
     property of celery because of the call to ``task_result.get()``. Keep in
