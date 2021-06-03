@@ -94,7 +94,7 @@ def post_to_uri(
     try:
         response = req.post(api_uri, data=message, timeout=req_timeout)
     except req.exceptions.Timeout:
-        raise req.exceptions.Timeout(time_out_message(api_uri))
+        raise req.exceptions.Timeout(time_out_message(api_uri, req_timeout))
 
     data_json = response.json()
 
