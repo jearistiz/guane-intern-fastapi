@@ -83,11 +83,8 @@ def run_uvicorn_server(
         )
 
         # Set env local Redis URI
-        redis_host = sttgs["REDIS_HOST"]
         redis_port = sttgs["REDIS_PORT"]
-        os.environ['CELERY_BAKCEND_URI'] = redis_local_url(
-            redis_host, redis_port
-        )
+        os.environ['CELERY_BAKCEND_URI'] = redis_local_url(redis_port)
         # Start Redis server
         redis_server_process = redis_server_start(redis_port)
 

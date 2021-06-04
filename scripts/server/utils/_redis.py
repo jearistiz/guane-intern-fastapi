@@ -2,7 +2,7 @@ from typing import List
 from subprocess import Popen, run, CompletedProcess
 
 
-def redis_local_url(host: str, port: str) -> str:
+def redis_local_url(port: str) -> str:
     return f'redis://0.0.0.0:{port}'
 
 
