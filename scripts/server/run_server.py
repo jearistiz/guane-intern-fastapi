@@ -3,13 +3,18 @@
 Run ``python run_server.py --help`` to see the options.
 """
 import os
-import subprocess
-import time
-import warnings
-from pathlib import Path
-from typing import List, Optional, Tuple
+from typing import Optional
 
 from typer import Typer, Option
+
+from utils._celery import start_celery_worker
+from utils._postgres import postgres_server_start, postgres_server_teardown
+from utils._redis import (
+    redis_local_url, redis_server_start, redis_server_teardown
+)
+from utils._rabbitmq import (
+    local_rabbitmq_uri, init_rabbitmq_app, rabbitmq_server_teardown
+)
 
 
 cli_app = Typer()
@@ -84,7 +89,7 @@ def run_uvicorn_server(
             redis_host, redis_port
         )
         # Start Redis server
-        redis_server_process = redis_server_start(redis_host, redis_port)
+        redis_server_process = redis_server_start(redis_port)
 
     # This dependencies need to be imported here so that the sqlAlchemy engine
     # is created with the correct uri (previously modified by local_db
@@ -126,195 +131,10 @@ def run_uvicorn_server(
     if not docker:
         rabbitmq_server_teardown(rabbitmq_server_process)
         redis_server_teardown(redis_server_process)
-        postgres_server_stop(postgres_datadir)
+        postgres_server_teardown(postgres_datadir)
 
     # Always terminate celery worker instance
     celery_worker_process.terminate()
-
-
-# Celery
-###############################################################################
-def start_celery_worker(module: str):
-    return subprocess.Popen(['celery', '-A', module, 'worker'])
-
-
-# PostgreSQL
-###############################################################################
-def postgres_server_start(datadir: str) -> subprocess.CompletedProcess:
-    return subprocess.run(['pg_ctl', '-D', datadir, 'start'])
-
-
-def postgres_server_stop(datadir: str) -> subprocess.CompletedProcess:
-    return subprocess.run(['pg_ctl', '-D', datadir, 'stop'])
-
-
-# Redis
-###############################################################################
-def redis_local_url(host: str, port: str) -> str:
-    return f'redis://{host}:{port}'
-
-
-def redis_server_start(
-    host: str, port: str, background: bool = True
-) -> subprocess.Popen:
-    daemonize = 'yes' if background else 'no'
-    return subprocess.Popen(
-        ['redis-server', '-h', host, '-p', port, '--daemonize', daemonize]
-    )
-
-
-def redis_server_shut_down():
-    return subprocess.run(['redis-cli', 'shutdown'])
-
-
-def redis_server_teardown(
-    redis_server_process: subprocess.Popen,
-    delete_file_names: List[str] = ['erl_crash.dump', 'dump.rdb']
-) -> subprocess.CompletedProcess:
-    redis_shut_down_completed_process = redis_server_shut_down()
-    subprocess.run(['rm'] + delete_file_names)
-    redis_server_process.terminate()
-    return redis_shut_down_completed_process
-
-
-# RabbitMQ
-###############################################################################
-def local_rabbitmq_uri(
-    user: str, pwd: str, port: str, vhost: str
-) -> str:
-    return f'amqp://{user}:{pwd}@0.0.0.0:{port}/{vhost}'
-
-
-def init_rabbitmq_app(
-    rabbitmq_user: str,
-    rabbitmq_pass: str,
-    rabbitmq_vhost: str,
-    max_retries: int = 10,
-    sleep_time: int = 1  # In seconds
-) -> Tuple[subprocess.Popen, int]:
-    """Starts the RabbitMQ server, creates a new user with its credentials,
-    creates a new virtual host and adds administration priviledges to the
-    user in the virtual host.
-    """
-
-    module_name_tag = f'[{Path(__file__).stem}]'
-    hidden_pass = "x" * (len(rabbitmq_pass) - 2) + rabbitmq_pass[-2:]
-    user_with_pass = f'user {rabbitmq_user} with password {hidden_pass}'
-
-    _, _ = rabbitmq_full_start_app()
-
-    # Create user
-    rabbitmq_user_process = rabbitmq_create_user(rabbitmq_user, rabbitmq_pass)
-
-    if rabbitmq_user_process.returncode == 0:
-        print(f'{module_name_tag} rabbitmqctl created {user_with_pass} ')
-    else:
-        warnings.warn(
-            f'{module_name_tag} rabbitmqctl couldn\'t create '
-            f'{user_with_pass}, probably because the server couldn\'t be '
-            'started appropriately or the user already existed.'
-        )
-
-    # Add virtual host
-    rabbitmq_add_vhost(rabbitmq_vhost)
-
-    # Set user as administrator
-    rabbitmq_set_user_admin(rabbitmq_user)
-
-    # Set read, write and execute permissions on user
-    rabbitmq_user_permissions(rabbitmq_vhost, rabbitmq_user)
-
-    # We need to restart the server, this way the newly created user and
-    # permissions take effect
-    rabbitmq_server_process, server_ping_statuscode = rabbitmq_restart_server(
-        max_retries, sleep_time
-    )
-
-    return rabbitmq_server_process, server_ping_statuscode
-
-
-def rabbitmq_start_wait_server(
-    retries: int = 15, sleep_time: int = 1
-) -> Tuple[subprocess.Popen, int]:
-    rabbitmq_server_process = subprocess.Popen(['rabbitmq-server'])
-
-    ping_returncode = 1
-
-    i = 0
-    while ping_returncode != 0 and i < retries:
-        time.sleep(sleep_time)
-        ping_process = subprocess.run(['rabbitmqctl', 'ping'])
-        ping_returncode = ping_process.returncode
-        del ping_process
-        i += 1
-
-    return rabbitmq_server_process, ping_returncode
-
-
-def rabbitmq_full_start_app(
-    retries: int = 15, sleep_time: int = 1
-) -> Tuple[subprocess.Popen, int]:
-    """Starts both rabbitmq server and application"""
-    # Start rabbitmq server
-    rabbitmq_server_process, server_ping_code = rabbitmq_start_wait_server(
-        retries, sleep_time
-    )
-    # Start rabbitmq application
-    subprocess.run(['rabbitmqctl', 'start_app'])
-    subprocess.run(['rabbitmqctl', 'await_startup'])
-    return rabbitmq_server_process, server_ping_code
-
-
-def rabbitmq_create_user(
-    rabbitmq_user: str, rabbitmq_pass: str
-) -> subprocess.CompletedProcess:
-    return subprocess.run(
-        ['rabbitmqctl', 'add_user', rabbitmq_user, rabbitmq_pass]
-    )
-
-
-def rabbitmq_add_vhost(rabbitmq_vhost: str) -> subprocess.CompletedProcess:
-    return subprocess.run(['rabbitmqctl', 'add_vhost', rabbitmq_vhost])
-
-
-def rabbitmq_set_user_admin(
-    rabbitmq_user: str
-) -> subprocess.CompletedProcess:
-    # Set user as administrator
-    subprocess.run(
-        ['rabbitmqctl', 'set_user_tags', rabbitmq_user, 'administrator']
-    )
-
-
-def rabbitmq_user_permissions(
-    rabbitmq_vhost: str,
-    rabbitmq_user: str,
-    permissions: Tuple[str, str, str] = ('.*', '.*', '.*')
-):
-    """Set read, write and execute permissions on user"""
-    cmd_base = [
-        'rabbitmqctl', 'set_permissions', '-p', rabbitmq_vhost, rabbitmq_user
-    ]
-    subprocess.run(cmd_base + list(permissions))
-
-
-def rabbitmq_restart_server(
-    retries: int = 15, sleep_time: int = 1
-) -> Tuple[subprocess.Popen, int]:
-    subprocess.run(['rabbitmqctl', 'shutdown'])
-    return rabbitmq_start_wait_server(retries, sleep_time)
-
-
-def rabbitmq_reset_and_shut_down_server():
-    rabbitmq_start_wait_server()
-    subprocess.run(['rabbitmqctl', 'stop_app'])
-    subprocess.run(['rabbitmqctl', 'reset'])
-    subprocess.run(['rabbitmqctl', 'shutdown'])
-
-
-def rabbitmq_server_teardown(rabbitmq_server_process: subprocess.Popen):
-    rabbitmq_server_process.terminate()
-    rabbitmq_reset_and_shut_down_server()
 
 
 if __name__ == '__main__':
