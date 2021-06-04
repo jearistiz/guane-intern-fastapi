@@ -137,6 +137,10 @@ internal_docs/
 postgres-data/*
 !postgres-data/empty-file.txt
 
+# RabbitMQ
+**dump**
+
+
 # Visual Studio Code
 ##############################################################################
 .vscode/*
