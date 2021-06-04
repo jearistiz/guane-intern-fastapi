@@ -56,31 +56,19 @@ def run_uvicorn_server(
 
     # Setup local environment (as opposed to docker). Tested on MacOS v11.2.3
     if not docker:
-        # Set local database URI
+        # Set env postgres URI
         os.environ['POSTGRES_URI'] = sttgs.get('POSTGRES_LOCAL_URI')
-
-        # Ser local RabbitMQ URI
-        os.environ['RABBITMQ_URI'] = (
-            'amqp://'
-            f'{sttgs["RABBITMQ_DEFAULT_USER"]}:'
-            f'{sttgs["RABBITMQ_DEFAULT_PASS"]}@'
-            f'0.0.0.0:{sttgs["RABBITMQ_PORT"]}/'
-            f'{sttgs["RABBITMQ_DEFAULT_VHOST"]}'
-        )
-
-        # Set local Redis URI
-        redis_host = sttgs["REDIS_HOST"]
-        redis_port = sttgs["REDIS_PORT"]
-        os.environ['CELERY_BAKCEND_URI'] = (
-            f'redis://{redis_host}:{redis_port}'
-        )
-
         # Start postgres server
-        postgres_command = [
-            'pg_ctl', '-D', '/usr/local/var/postgres'
-        ]
-        subprocess.run(postgres_command + ['start'])
+        postgres_datadir = '/usr/local/var/postgres'
+        postgres_start_server(postgres_datadir)
 
+        # Set env local RabbitMQ URI
+        os.environ['RABBITMQ_URI'] = local_rabbitmq_uri(
+            user=sttgs["RABBITMQ_DEFAULT_USER"],
+            pwd=sttgs["RABBITMQ_DEFAULT_PASS"],
+            port=sttgs["RABBITMQ_PORT"],
+            vhost=sttgs["RABBITMQ_DEFAULT_VHOST"]
+        )
         # Start RabbitMQ
         rabbitmq_user = sttgs.get('RABBITMQ_DEFAULT_USER', 'guane')
         rabbitmq_pass = sttgs.get('RABBITMQ_DEFAULT_PASS', 'ilovefuelai')
@@ -89,10 +77,14 @@ def run_uvicorn_server(
             rabbitmq_user, rabbitmq_pass, rabbtmq_vhost
         )
 
-        # Start Redis server
-        redis_server = subprocess.Popen(
-            ['redis-server', '-h', redis_host, '-p', redis_port]
+        # Set env local Redis URI
+        redis_host = sttgs["REDIS_HOST"]
+        redis_port = sttgs["REDIS_PORT"]
+        os.environ['CELERY_BAKCEND_URI'] = local_redis_url(
+            redis_host, redis_port
         )
+        # Start Redis server
+        redis_server_process = start_redis_server(redis_host, redis_port)
 
     # This dependencies need to be imported here so that the sqlAlchemy engine
     # is created with the correct uri (previously modified by local_db
@@ -113,9 +105,7 @@ def run_uvicorn_server(
     backend_port = port if port else sttgs.get('BACKEND_PORT', 8080)
 
     # Start celery worker
-    celery_worker = subprocess.Popen(
-        ['celery', '-A', 'app.worker.celery_tasks', 'worker']
-    )
+    celery_worker = start_celery_worker(module='app.worker.celery_tasks')
 
     # Run server
     uvicorn.run(
@@ -127,22 +117,51 @@ def run_uvicorn_server(
         workers=int(sttgs.get('SERVER_WORKERS', 1)),
     )
 
-    # Optionally drop tables
+    # Optionally drop all postgres tables
     drop_all_tables(drop=drop_tables)
 
     # Terminate local (as opposed to docker) processes
     if not docker:
-        rabbitmq_server_process.terminate()
-        rabbitmq_start_wait_server()
-        subprocess.run(['rabbitmqctl', 'stop_app'])
-        subprocess.run(['rabbitmqctl', 'reset'])
-        subprocess.run(['rabbitmqctl', 'shutdown'])
-        redis_server.terminate()
-        # Stop postgres server
-        subprocess.run(postgres_command + ['stop'])
+        rabbitmq_teardown_server(rabbitmq_server_process)
+        redis_server_process.terminate()
+        postgres_stop_server(postgres_datadir)
 
-    # Terminate celery worker instance
+    # Always terminate celery worker instance
     celery_worker.terminate()
+
+
+# Celery
+###############################################################################
+def start_celery_worker(module: str):
+    return subprocess.Popen(['celery', '-A', module, 'worker'])
+
+
+# PostgreSQL
+###############################################################################
+def postgres_start_server(datadir: str) -> subprocess.Popen:
+    return subprocess.run(['pg_ctl', '-D', datadir, 'start'])
+
+
+def postgres_stop_server(datadir: str) -> subprocess.Popen:
+    return subprocess.run(['pg_ctl', '-D', datadir, 'stop'])
+
+
+# Redis
+###############################################################################
+def local_redis_url(host: str, port: str) -> str:
+    return f'redis://{host}:{port}'
+
+
+def start_redis_server(host: str, port: str) -> subprocess.Popen:
+    return subprocess.Popen(['redis-server', '-h', host, '-p', port])
+
+
+# RabbitMQ
+###############################################################################
+def local_rabbitmq_uri(
+    user: str, pwd: str, port: str, vhost: str
+) -> str:
+    return f'amqp://{user}:{pwd}@0.0.0.0:{port}/{vhost}'
 
 
 def init_rabbitmq_app(
@@ -152,6 +171,11 @@ def init_rabbitmq_app(
     max_retries: int = 10,
     sleep_time: int = 1  # In seconds
 ) -> Tuple[subprocess.Popen, int]:
+    """Starts the RabbitMQ server, creates a new user with its credentials,
+    creates a new virtual host and adds administration priviledges to the
+    user in the virtual host.
+    """
+
     module_name_tag = f'[{Path(__file__).stem}]'
     hidden_pass = "x" * (len(rabbitmq_pass) - 2) + rabbitmq_pass[-2:]
     user_with_pass = f'user {rabbitmq_user} with password {hidden_pass}'
@@ -179,7 +203,8 @@ def init_rabbitmq_app(
     # Set read, write and execute permissions on user
     rabbitmq_user_permissions(rabbitmq_vhost, rabbitmq_user)
 
-    # Restart server
+    # We need to restart the server, this way the newly created user and
+    # permissions take effect
     rabbitmq_server_process, server_ping_statuscode = rabbitmq_restart_server(
         max_retries, sleep_time
     )
@@ -257,6 +282,18 @@ def rabbitmq_restart_server(
 ) -> Tuple[subprocess.Popen, int]:
     subprocess.run(['rabbitmqctl', 'shutdown'])
     return rabbitmq_start_wait_server(retries, sleep_time)
+
+
+def rabbitmq_reset_server():
+    rabbitmq_start_wait_server()
+    subprocess.run(['rabbitmqctl', 'stop_app'])
+    subprocess.run(['rabbitmqctl', 'reset'])
+    subprocess.run(['rabbitmqctl', 'shutdown'])
+
+
+def rabbitmq_teardown_server(rabbitmq_server_process: subprocess.Popen):
+    rabbitmq_server_process.terminate()
+    rabbitmq_reset_server()
 
 
 if __name__ == '__main__':
