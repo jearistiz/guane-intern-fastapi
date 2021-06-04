@@ -7,7 +7,7 @@ import subprocess
 import time
 import warnings
 from pathlib import Path
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 from typer import Typer, Option
 
@@ -60,7 +60,7 @@ def run_uvicorn_server(
         os.environ['POSTGRES_URI'] = sttgs.get('POSTGRES_LOCAL_URI')
         # Start postgres server
         postgres_datadir = '/usr/local/var/postgres'
-        postgres_start_server(postgres_datadir)
+        postgres_server_start(postgres_datadir)
 
         # Set env local RabbitMQ URI
         os.environ['RABBITMQ_URI'] = local_rabbitmq_uri(
@@ -80,11 +80,11 @@ def run_uvicorn_server(
         # Set env local Redis URI
         redis_host = sttgs["REDIS_HOST"]
         redis_port = sttgs["REDIS_PORT"]
-        os.environ['CELERY_BAKCEND_URI'] = local_redis_url(
+        os.environ['CELERY_BAKCEND_URI'] = redis_local_url(
             redis_host, redis_port
         )
         # Start Redis server
-        redis_server_process = start_redis_server(redis_host, redis_port)
+        redis_server_process = redis_server_start(redis_host, redis_port)
 
     # This dependencies need to be imported here so that the sqlAlchemy engine
     # is created with the correct uri (previously modified by local_db
@@ -105,7 +105,9 @@ def run_uvicorn_server(
     backend_port = port if port else sttgs.get('BACKEND_PORT', 8080)
 
     # Start celery worker
-    celery_worker = start_celery_worker(module='app.worker.celery_tasks')
+    celery_worker_process = start_celery_worker(
+        module='app.worker.celery_tasks'
+    )
 
     # Run server
     uvicorn.run(
@@ -122,12 +124,12 @@ def run_uvicorn_server(
 
     # Terminate local (as opposed to docker) processes
     if not docker:
-        rabbitmq_teardown_server(rabbitmq_server_process)
-        redis_server_process.terminate()
-        postgres_stop_server(postgres_datadir)
+        rabbitmq_server_teardown(rabbitmq_server_process)
+        redis_server_teardown(redis_server_process)
+        postgres_server_stop(postgres_datadir)
 
     # Always terminate celery worker instance
-    celery_worker.terminate()
+    celery_worker_process.terminate()
 
 
 # Celery
@@ -138,22 +140,41 @@ def start_celery_worker(module: str):
 
 # PostgreSQL
 ###############################################################################
-def postgres_start_server(datadir: str) -> subprocess.Popen:
+def postgres_server_start(datadir: str) -> subprocess.CompletedProcess:
     return subprocess.run(['pg_ctl', '-D', datadir, 'start'])
 
 
-def postgres_stop_server(datadir: str) -> subprocess.Popen:
+def postgres_server_stop(datadir: str) -> subprocess.CompletedProcess:
     return subprocess.run(['pg_ctl', '-D', datadir, 'stop'])
 
 
 # Redis
 ###############################################################################
-def local_redis_url(host: str, port: str) -> str:
+def redis_local_url(host: str, port: str) -> str:
     return f'redis://{host}:{port}'
 
 
-def start_redis_server(host: str, port: str) -> subprocess.Popen:
-    return subprocess.Popen(['redis-server', '-h', host, '-p', port])
+def redis_server_start(
+    host: str, port: str, background: bool = True
+) -> subprocess.Popen:
+    daemonize = 'yes' if background else 'no'
+    return subprocess.Popen(
+        ['redis-server', '-h', host, '-p', port, '--daemonize', daemonize]
+    )
+
+
+def redis_server_shut_down():
+    return subprocess.run(['redis-cli', 'shutdown'])
+
+
+def redis_server_teardown(
+    redis_server_process: subprocess.Popen,
+    delete_file_names: List[str] = ['erl_crash.dump', 'dump.rdb']
+) -> subprocess.CompletedProcess:
+    redis_shut_down_completed_process = redis_server_shut_down()
+    subprocess.run(['rm'] + delete_file_names)
+    redis_server_process.terminate()
+    return redis_shut_down_completed_process
 
 
 # RabbitMQ
@@ -284,16 +305,16 @@ def rabbitmq_restart_server(
     return rabbitmq_start_wait_server(retries, sleep_time)
 
 
-def rabbitmq_reset_server():
+def rabbitmq_reset_and_shut_down_server():
     rabbitmq_start_wait_server()
     subprocess.run(['rabbitmqctl', 'stop_app'])
     subprocess.run(['rabbitmqctl', 'reset'])
     subprocess.run(['rabbitmqctl', 'shutdown'])
 
 
-def rabbitmq_teardown_server(rabbitmq_server_process: subprocess.Popen):
+def rabbitmq_server_teardown(rabbitmq_server_process: subprocess.Popen):
     rabbitmq_server_process.terminate()
-    rabbitmq_reset_server()
+    rabbitmq_reset_and_shut_down_server()
 
 
 if __name__ == '__main__':
