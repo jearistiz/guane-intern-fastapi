@@ -85,7 +85,7 @@ def run_uvicorn_server(
         rabbitmq_user = sttgs.get('RABBITMQ_DEFAULT_USER', 'guane')
         rabbitmq_pass = sttgs.get('RABBITMQ_DEFAULT_PASS', 'ilovefuelai')
         rabbtmq_vhost = sttgs.get('RABBITMQ_DEFAULT_VHOST', 'fuelai')
-        rabbitmq_server = init_rabbitmq_app(  # noqa
+        rabbitmq_server_process, _ = init_rabbitmq_app(  # noqa
             rabbitmq_user, rabbitmq_pass, rabbtmq_vhost
         )
 
@@ -132,7 +132,7 @@ def run_uvicorn_server(
 
     # Terminate local (as opposed to docker) processes
     if not docker:
-        rabbitmq_server.terminate()
+        rabbitmq_server_process.terminate()
         rabbitmq_start_wait_server()
         subprocess.run(['rabbitmqctl', 'stop_app'])
         subprocess.run(['rabbitmqctl', 'reset'])
@@ -151,42 +151,15 @@ def init_rabbitmq_app(
     rabbitmq_vhost: str,
     max_retries: int = 10,
     sleep_time: int = 1  # In seconds
-) -> subprocess.Popen:
+) -> Tuple[subprocess.Popen, int]:
     module_name_tag = f'[{Path(__file__).stem}]'
     hidden_pass = "x" * (len(rabbitmq_pass) - 2) + rabbitmq_pass[-2:]
     user_with_pass = f'user {rabbitmq_user} with password {hidden_pass}'
 
-    # Start rabbitmq server
-    rabbitmq_server = subprocess.Popen(['rabbitmq-server'])
-    rabbitmq_server_started = False
+    _, _ = rabbitmq_full_start_app()
 
-    # Create user and password, add permissions
-    i = 0
-    while not rabbitmq_server_started and i < max_retries:
-        rabbitmq_ping_return_code = subprocess.run(
-            ['rabbitmqctl', 'ping']
-        ).returncode
-
-        # If server is active, create user
-        if rabbitmq_ping_return_code == 0:
-            # Start rabbitmq application
-            subprocess.run(['rabbitmqctl', 'start_app'])
-            subprocess.run(['rabbitmqctl', 'await_startup'])
-            # Create user
-            rabbitmq_user_process = subprocess.run(
-                ['rabbitmqctl', 'add_user', rabbitmq_user, rabbitmq_pass]
-            )
-            rabbitmq_server_started = True
-            break
-
-        print(
-            f'{module_name_tag} rabbitmqctl trying to create '
-            f'{user_with_pass}, but rabbitmq-server seems not to be active.'
-        )
-
-        time.sleep(sleep_time)
-
-        i += 1
+    # Create user
+    rabbitmq_user_process = rabbitmq_create_user(rabbitmq_user, rabbitmq_pass)
 
     if rabbitmq_user_process.returncode == 0:
         print(f'{module_name_tag} rabbitmqctl created {user_with_pass} ')
@@ -198,32 +171,20 @@ def init_rabbitmq_app(
         )
 
     # Add virtual host
-    subprocess.run(['rabbitmqctl', 'add_vhost', rabbitmq_vhost])
+    rabbitmq_add_vhost(rabbitmq_vhost)
 
     # Set user as administrator
-    subprocess.run(
-        ['rabbitmqctl', 'set_user_tags', rabbitmq_user, 'administrator']
-    )
+    rabbitmq_set_user_admin(rabbitmq_user)
 
     # Set read, write and execute permissions on user
-    all_permissions = '.*'  # f"{rabbitmq_user}-client-queues|amq\.default"
-    subprocess.run(
-        [
-            'rabbitmqctl', 'set_permissions', '-p',
-            rabbitmq_vhost, rabbitmq_user,
-            all_permissions, all_permissions, all_permissions
-        ]
+    rabbitmq_user_permissions(rabbitmq_vhost, rabbitmq_user)
+
+    # Restart server
+    rabbitmq_server_process, server_ping_statuscode = rabbitmq_restart_server(
+        max_retries, sleep_time
     )
 
-    # Restart server
-    subprocess.run(['rabbitmqctl', 'shutdown'])
-    rabbitmq_server = subprocess.Popen(['rabbitmq-server'])
-
-    # Restart server
-    subprocess.run(['rabbitmqctl', 'shutdown'])
-    rabbitmq_server = subprocess.Popen(['rabbitmq-server'])
-
-    return rabbitmq_server
+    return rabbitmq_server_process, server_ping_statuscode
 
 
 def rabbitmq_start_wait_server(
@@ -242,6 +203,60 @@ def rabbitmq_start_wait_server(
         i += 1
 
     return rabbitmq_server_process, ping_returncode
+
+
+def rabbitmq_full_start_app(
+    retries: int = 15, sleep_time: int = 1
+) -> Tuple[subprocess.Popen, int]:
+    """Starts both rabbitmq server and application"""
+    # Start rabbitmq server
+    rabbitmq_server_process, server_ping_code = rabbitmq_start_wait_server(
+        retries, sleep_time
+    )
+    # Start rabbitmq application
+    subprocess.run(['rabbitmqctl', 'start_app'])
+    subprocess.run(['rabbitmqctl', 'await_startup'])
+    return rabbitmq_server_process, server_ping_code
+
+
+def rabbitmq_create_user(
+    rabbitmq_user: str, rabbitmq_pass: str
+) -> subprocess.CompletedProcess:
+    return subprocess.run(
+        ['rabbitmqctl', 'add_user', rabbitmq_user, rabbitmq_pass]
+    )
+
+
+def rabbitmq_add_vhost(rabbitmq_vhost: str) -> subprocess.CompletedProcess:
+    return subprocess.run(['rabbitmqctl', 'add_vhost', rabbitmq_vhost])
+
+
+def rabbitmq_set_user_admin(
+    rabbitmq_user: str
+) -> subprocess.CompletedProcess:
+    # Set user as administrator
+    subprocess.run(
+        ['rabbitmqctl', 'set_user_tags', rabbitmq_user, 'administrator']
+    )
+
+
+def rabbitmq_user_permissions(
+    rabbitmq_vhost: str,
+    rabbitmq_user: str,
+    permissions: Tuple[str, str, str] = ('.*', '.*', '.*')
+):
+    """Set read, write and execute permissions on user"""
+    cmd_base = [
+        'rabbitmqctl', 'set_permissions', '-p', rabbitmq_vhost, rabbitmq_user
+    ]
+    subprocess.run(cmd_base + list(permissions))
+
+
+def rabbitmq_restart_server(
+    retries: int = 15, sleep_time: int = 1
+) -> Tuple[subprocess.Popen, int]:
+    subprocess.run(['rabbitmqctl', 'shutdown'])
+    return rabbitmq_start_wait_server(retries, sleep_time)
 
 
 if __name__ == '__main__':
