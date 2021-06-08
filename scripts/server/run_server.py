@@ -5,19 +5,11 @@ Run ``python run_server.py --help`` to see the options.
 import os
 from typing import Optional
 
+import uvicorn
 from typer import Typer, Option
 
+from scripts.utils._manage_services import setup_services, teardown_services
 from scripts.utils._celery import start_celery_worker
-from scripts.utils._postgres import (
-    postgres_server_start,
-    postgres_server_teardown,
-)
-from scripts.utils._redis import (
-    redis_local_url, redis_server_start, redis_server_teardown
-)
-from scripts.utils._rabbitmq import (
-    local_rabbitmq_uri, init_rabbitmq_app, rabbitmq_server_teardown
-)
 
 
 cli_app = Typer()
@@ -66,38 +58,26 @@ def run_uvicorn_server(
     if not docker:
         # Set env postgres URI
         os.environ['POSTGRES_URI'] = sttgs.get('POSTGRES_LOCAL_URI')
-        # Start postgres server
+
         postgres_datadir = '/usr/local/var/postgres'
-        postgres_server_start(postgres_datadir)
 
-        # Set env local RabbitMQ URI
-        os.environ['RABBITMQ_URI'] = local_rabbitmq_uri(
-            user=sttgs["RABBITMQ_DEFAULT_USER"],
-            pwd=sttgs["RABBITMQ_DEFAULT_PASS"],
-            port=sttgs["RABBITMQ_PORT"],
-            vhost=sttgs["RABBITMQ_DEFAULT_VHOST"]
-        )
-        # Start RabbitMQ
-        rabbitmq_user = sttgs.get('RABBITMQ_DEFAULT_USER', 'guane')
-        rabbitmq_pass = sttgs.get('RABBITMQ_DEFAULT_PASS', 'ilovefuelai')
-        rabbtmq_vhost = sttgs.get('RABBITMQ_DEFAULT_VHOST', 'fuelai')
-        rabbitmq_server_process, _ = init_rabbitmq_app(  # noqa
-            rabbitmq_user, rabbitmq_pass, rabbtmq_vhost
+        # The celery worker must be initialized every single time, not just if
+        # it is a 'local' deploy, we initialize it outside this if statement
+        rabbitmq_server_process, redis_server_process, _ = setup_services(
+            postgres_datadir=postgres_datadir,
+            celery_worker=False
         )
 
-        # Set env local Redis URI
-        redis_port = sttgs["REDIS_PORT"]
-        os.environ['CELERY_BAKCEND_URI'] = redis_local_url(redis_port)
-        # Start Redis server
-        redis_server_process = redis_server_start(redis_port)
+    # Start celery worker
+    celery_worker_process = start_celery_worker(
+        module='app.worker.celery_tasks'
+    )
 
     # This dependencies need to be imported here so that the sqlAlchemy engine
     # is created with the correct uri (previously modified by local_db
     # oprtion). If they are imported at the beggining of the script, the
     # dependencies inside the import statements will make the server to be run
     # using the wrong URI
-    import uvicorn
-
     from app.db.db_manager import create_all_tables, drop_all_tables
     from app.db.utils import populate_tables_mock_data
 
@@ -108,11 +88,6 @@ def run_uvicorn_server(
     populate_tables_mock_data(populate=populate_tables)
 
     backend_port = port if port else sttgs.get('BACKEND_PORT', 8080)
-
-    # Start celery worker
-    celery_worker_process = start_celery_worker(
-        module='app.worker.celery_tasks'
-    )
 
     # Run server
     uvicorn.run(
@@ -127,14 +102,17 @@ def run_uvicorn_server(
     # Optionally drop all postgres tables
     drop_all_tables(drop=drop_tables)
 
-    # Terminate local (as opposed to docker) processes
-    if not docker:
-        rabbitmq_server_teardown(rabbitmq_server_process)
-        redis_server_teardown(redis_server_process)
-        postgres_server_teardown(postgres_datadir)
-
     # Always terminate celery worker instance
     celery_worker_process.terminate()
+
+    # Terminate local (as opposed to docker) processes
+    if not docker:
+        teardown_services(
+            rabbitmq_server_process,
+            redis_server_process,
+            celery_worker_process=None,
+            postgres_datadir=postgres_datadir,
+        )
 
 
 if __name__ == '__main__':
