@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app import schemas
 from app.config import sttgs
@@ -11,8 +11,12 @@ from app.worker.celery_tasks import task_post_to_uri
 tasks_router = APIRouter()
 
 
-@tasks_router.post('/celery_task', response_model=schemas.CeleryTaskResponse)
-def celery_task(
+@tasks_router.post(
+    '/celery_task',
+    response_model=schemas.CeleryTaskResponse,
+    status_code=status.HTTP_201_CREATED,
+)
+async def celery_task(
     task_complexity: int,
     request: Request,
     current_superuser: schemas.SuperUser = Depends(
@@ -37,9 +41,10 @@ def celery_task(
 
 @tasks_router.post(
     '/celery_task_not_async',
-    response_model=schemas.CeleryTaskResponse
+    response_model=schemas.CeleryTaskResponse,
+    status_code=status.HTTP_201_CREATED,
 )
-def celery_task_not_async(
+async def celery_task_not_async(
     task_complexity: int,
     request: Request,
     current_superuser: schemas.SuperUser = Depends(

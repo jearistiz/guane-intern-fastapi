@@ -2,6 +2,7 @@ from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
+from starlette import status
 
 from app import schemas, crud
 from app.api import deps
@@ -68,6 +69,7 @@ async def get_dogs_name(
     '/{name}',
     response_model=schemas.Dog,
     name='Save one dog.',
+    status_code=status.HTTP_201_CREATED,
 )
 async def post_dogs_name(
     *,
@@ -90,7 +92,7 @@ async def post_dogs_name(
 @dogs_router.put(
     '/{name}',
     response_model=schemas.Dog,
-    name='Update dog info by name.'
+    name='Update dog info by name.',
 )
 async def put_dogs_name(
     *,
@@ -111,7 +113,7 @@ async def put_dogs_name(
 @dogs_router.delete(
     '/{name}',
     response_model=schemas.Dog,
-    name='Delete dog by name.'
+    name='Delete dog by name.',
 )
 async def delete_dogs_name(
     *,
