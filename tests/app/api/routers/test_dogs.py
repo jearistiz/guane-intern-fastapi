@@ -63,7 +63,7 @@ class TestDogsRouter(HandleDBTest):
         response = app_client.post(
             post_dogs_name_route, json=data, headers=superuser_token_headers
         )
-        assert response.status_code == 200
+        assert response.status_code == 201
         content = response.json()
         self.assert_dogs_data(reference=data, compare=content)
 

@@ -7,12 +7,15 @@ from typing import Optional
 
 from typer import Typer, Option
 
-from utils._celery import start_celery_worker
-from utils._postgres import postgres_server_start, postgres_server_teardown
-from utils._redis import (
+from scripts.utils._celery import start_celery_worker
+from scripts.utils._postgres import (
+    postgres_server_start,
+    postgres_server_teardown,
+)
+from scripts.utils._redis import (
     redis_local_url, redis_server_start, redis_server_teardown
 )
-from utils._rabbitmq import (
+from scripts.utils._rabbitmq import (
     local_rabbitmq_uri, init_rabbitmq_app, rabbitmq_server_teardown
 )
 
