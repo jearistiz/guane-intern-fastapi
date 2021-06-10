@@ -10,7 +10,7 @@ from app.utils.http_request import post_to_uri
     acks_late=True,
     retry_kwargs={'max_retries': 2},
 )
-def task_post_to_uri(
+def post_to_uri_task(
     self,
     query_uri: str = sttgs['GUANE_WORKER_URI'] + '?task_complexity=0',
     message: Dict[str, Any] = {},

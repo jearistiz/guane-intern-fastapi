@@ -6,7 +6,7 @@ from celery.result import AsyncResult
 from app import schemas
 from app.config import sttgs
 from app.crud import superuser_crud
-from app.worker.celery_tasks import task_post_to_uri
+from app.worker.celery_app import celery_app
 
 
 tasks_router = APIRouter()
@@ -82,7 +82,10 @@ async def run_task_post_to_uri(
         sttgs.get('GUANE_WORKER_URI') + f'?task_complexity={task_complexity}'
     )
     try:
-        task_result: AsyncResult = task_post_to_uri.delay(query_uri=query_uri)
+        task_result: AsyncResult = celery_app.send_task(
+            'app.worker.tasks.post_to_uri_task',
+            kwargs={'query_uri': query_uri}
+        )
         # If next code block is executed, the async nature of the task will
         # be lost since task_result.get waits until the task is complete.
         if get_task_result:

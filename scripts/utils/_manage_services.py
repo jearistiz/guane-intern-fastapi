@@ -18,6 +18,7 @@ from scripts.utils._rabbitmq import (
 def setup_services(
     postgres_datadir: str = '/usr/local/var/postgres',
     celery_worker: bool = False,
+    debug_celery_worker: bool = False,
 ) -> Tuple[Popen, Popen, Optional[Popen]]:
     """Start RabbitMQ, Redis and Celery isntances.
 
@@ -51,9 +52,7 @@ def setup_services(
 
     if celery_worker:
         # Start celery worker
-        celery_worker_process = start_celery_worker(
-            module='app.worker.celery_tasks'
-        )
+        celery_worker_process = start_celery_worker(debug=debug_celery_worker)
     else:
         celery_worker_process = None
 

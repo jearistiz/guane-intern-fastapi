@@ -21,17 +21,14 @@ docker_help = (
     'This ensures that a valid $POSGRES_URI is parsed from the ``~/.env`` '
     'file.'
 )
-server_running_help = (
-    'Use this option when you are locally running the server (as opposed to '
-    'running it using docker) and it is active. This is because if the '
-    'server is running so are Celery, RabbitMQ, and Redis and we can just '
-    'use those in our testing environment. Note that if you do not want this '
-    'behaviour, you will need to modify this script and fit it to your needs.'
-)
 repopulate_tables_help = (
     'When the --docker option is set to true, the tables will be empty after '
     'the tests. If you want to repopulate the tables with mock data, use this '
     'option. This option only works together with --docker option.'
+)
+debug_celery_help = (
+    'Set to True if you want to see calery debug messages in your terminal '
+    'session.'
 )
 cov_help = 'Show coverage of tests with target directory app/'
 cov_html_help = (
@@ -53,8 +50,8 @@ override_options_help = (
 @tests_cli.command()
 def run_tests(
     docker: bool = Option(True, help=docker_help),
-    server_running: bool = Option(False, help=server_running_help),
     repopulate_tables: bool = Option(True, help=repopulate_tables_help),
+    debug_celery: bool = Option(False, help=debug_celery_help),
     cov: bool = Option(True, help=cov_help),
     cov_html: bool = Option(False, help=cov_html_help),
     print_all: bool = Option(False, help=print_all_help),
@@ -68,17 +65,18 @@ def run_tests(
         os.environ['POSTGRES_TESTS_URI'] = sttgs.get(
             'POSTGRES_LOCAL_TESTS_URI'
         )
-        if not server_running:
-            postgres_datadir = '/usr/local/var/postgres'
 
-            services_processes = setup_services(
-                postgres_datadir=postgres_datadir,
-                celery_worker=True,
-            )
+        postgres_datadir = '/usr/local/var/postgres'
 
-            rabbitmq_server_process = services_processes[0]
-            redis_server_process = services_processes[1]
-            celery_worker_process = services_processes[2]
+        services_processes = setup_services(
+            postgres_datadir=postgres_datadir,
+            celery_worker=True,
+            debug_celery_worker=debug_celery
+        )
+
+        rabbitmq_server_process = services_processes[0]
+        redis_server_process = services_processes[1]
+        celery_worker_process = services_processes[2]
 
     # First pytest_args element: tests directory
     pytest_args = ["tests"]
@@ -119,7 +117,7 @@ def run_tests(
     print(std)
 
     # Terminate local (as opposed to docker) processes
-    if not docker and not server_running:
+    if not docker:
         teardown_services(
             rabbitmq_server_process,
             redis_server_process,

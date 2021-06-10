@@ -38,6 +38,10 @@ auto_reload_server_help = (
     'If you use it together with --drop-tables tables won\'t be dropped '
     'either.'
 )
+debug_celery_help = (
+    'Set to True if you want to see calery debug messages in your terminal '
+    'session.'
+)
 
 
 @cli_app.command()
@@ -47,6 +51,7 @@ def run_uvicorn_server(
     populate_tables: bool = Option(True, help=populate_tables_help),
     drop_tables: bool = Option(True, help=drop_tables_help),
     auto_reload_server: bool = Option(False, help=drop_tables_help),
+    debug_celery: bool = Option(False, help=debug_celery_help)
 ) -> None:
     """Run the FastAPI app using an uvicorn server, optionally setting up and
     tearing down some other overheads such as PostgreSQL db, Celery worker,
@@ -69,9 +74,7 @@ def run_uvicorn_server(
         )
 
     # Start celery worker
-    celery_worker_process = start_celery_worker(
-        module='app.worker.celery_tasks'
-    )
+    celery_worker_process = start_celery_worker(debug=debug_celery)
 
     # This dependencies need to be imported here so that the sqlAlchemy engine
     # is created with the correct uri (previously modified by local_db

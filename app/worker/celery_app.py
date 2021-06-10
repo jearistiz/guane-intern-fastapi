@@ -9,6 +9,4 @@ celery_app = Celery(
     backend=sttgs['CELERY_BAKCEND_URI'],
 )
 
-celery_app.conf.task_routes = {
-    'app.worker.celery_task.task_post_to_uri': 'post-uri'
-}
+celery_app.autodiscover_tasks(['app.worker'])
