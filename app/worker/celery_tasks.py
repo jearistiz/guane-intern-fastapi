@@ -1,7 +1,7 @@
 from typing import Dict, List, Any
 
 from app.config import sttgs
-from app.core.celery_app import celery_app
+from app.worker.celery_app import celery_app
 from app.utils.http_request import post_to_uri
 
 
