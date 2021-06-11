@@ -7,21 +7,21 @@ from app.main import app
 from app.api.deps import get_db
 from tests.mock.db_session import (
     TestSessionLocal,
-    init_test_db,
     testing_get_db,
-    close_test_db
+    setup_test_db,
+    teardown_test_db,
 )
 from tests.utils.security import get_superuser_token_headers
 
 
-# Setup test DB
+# Setup tests
 def pytest_sessionstart(session: pytest.Session):
-    init_test_db()
+    setup_test_db()
 
 
 # Delete all tables in test DB
 def pytest_sessionfinish(session: pytest.Session):
-    close_test_db()
+    teardown_test_db()
 
 
 @pytest.fixture(scope="function")

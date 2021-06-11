@@ -1,6 +1,6 @@
 from typing import Any
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app import crud, schemas
@@ -44,7 +44,8 @@ async def get_users_name(
 @users_router.post(
     '/{name}',
     response_model=schemas.User,
-    name='Create user'
+    name='Create user',
+    status_code=status.HTTP_201_CREATED,
 )
 async def post_users_name(
     *,

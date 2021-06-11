@@ -98,7 +98,7 @@ There are some options for this testing initialization script (which underneath 
 
 ## Deploy without using Docker
 
-The application can also be deployed locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here.
+The application can also be deployed locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here. Soon.
 
 ## Code quality
 

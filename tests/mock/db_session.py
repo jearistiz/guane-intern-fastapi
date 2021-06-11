@@ -32,13 +32,13 @@ def populate_test_tables() -> None:
     )
 
 
-def init_test_db() -> None:
+def setup_test_db() -> None:
     drop_all_tables(engine=test_engine, drop=True)
     create_all_tables(engine=test_engine)
     populate_test_tables()
 
 
-def close_test_db() -> None:
+def teardown_test_db() -> None:
     drop_all_tables(engine=test_engine, drop=True)
 
 

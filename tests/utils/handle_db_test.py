@@ -1,6 +1,6 @@
 from tests.mock.db_session import (  # noqa
-    close_test_db,
-    init_test_db,
+    setup_test_db,
+    teardown_test_db,
 )
 
 
@@ -10,11 +10,11 @@ class HandleDBTest:
     """
     def setup_method(self):
         # populate_test_tables
-        init_test_db()
+        setup_test_db()
 
     def teardown_method(self):
-        close_test_db()
+        teardown_test_db()
 
     @classmethod
     def teardown_class(cls):
-        init_test_db()
+        setup_test_db()
