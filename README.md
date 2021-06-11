@@ -100,6 +100,19 @@ There are some options for this testing initialization script (which underneath 
 
 The application can also be deployed locally in your machine. It is a bit more dificult since we need to meet more requirements and setup some stuff first, but soon I will post more info on this here. Soon.
 
+### Requirements
+
+* ``python >= 3.9``: <https://www.python.org/downloads/>
+* ``pipenv``: ``$ pip3 install pipenv``
+* ``postgres >= 13.2``: <https://www.postgresql.org/download/>
+  * make sure the ``createdb`` and ``pg_ctl`` CLIs are installed using the commands ``which createdb``, etc.
+* ``RabbitMQ``: <https://www.rabbitmq.com/download.html>
+  * make sure the ``rabbitmq-server`` and ``rabbitmqctl`` CLIs are installed.
+* ``Redis``: <https://redis.io/topics/quickstart>
+  * make sure the ``celery`` CLI is installed.
+
+**NOTE:** you may find the scripts used for server initialization invasive. Please take into account that this scripts might start and stop the appropriate servers (postgres, celery, rabbitmq, redis), and they might create and delete users in the mentioned services. Please review the scripts before executing them and execute them only under your own responsibility.
+
 ## Code quality
 
 The developement process has been carefully monitored using the sonarcloud engine available at <https://sonarcloud.io/dashboard?id=jearistiz_guane-intern-fastapi>. Flake8 linter has also been used thoroughly for code style and pytest to ensure the code is working as expected.
