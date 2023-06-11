@@ -23,14 +23,15 @@ and installed Docker.
 Now move to the project root directory
 
 ```bash
-$ mv guane-intern-fastapi
+$ cd guane-intern-fastapi
 ```
 
 Unless otherwise stated, all the commands should be executed from the project root directory denoted as ``~/``.
 
 To run the docker images just prepare your environment variables in the ``~/.env`` file and run
 
-```bash
+```bashmv guane-intern-fastapi
+Unless otherwise stated, all the commands
 $ docker compose up --build
 ```
 
