@@ -30,8 +30,7 @@ Unless otherwise stated, all the commands should be executed from the project ro
 
 To run the docker images just prepare your environment variables in the ``~/.env`` file and run
 
-```bashmv guane-intern-fastapi
-Unless otherwise stated, all the commands
+```bash
 $ docker compose up --build
 ```
 
